@@ -7,7 +7,7 @@ function App() {
   return (
     <>
       <NavBar />
-      <ItemListContainer saludo="Hola" />
+      <ItemListContainer saludo="¡Bienvenidos a Donas y Rosquitas!" />
     </>
   );
 }

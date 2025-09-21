@@ -1,4 +1,5 @@
 import logo from '../assets/logodonas.jpg'; 
+import { CartWidget } from './CartWidget';
 
 export const NavBar = () => (
   <>
@@ -15,6 +16,7 @@ export const NavBar = () => (
           <a href="#">Catálogo</a>
         </li>
       </ul>
+      <CartWidget />
     </nav>
   </>
 );
