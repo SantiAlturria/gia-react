@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import ItemListContainer from "./components/ItemListContainer";
 import ItemDetailContainer from "./components/ItemDetailContainer";
+import HeroSection from "./components/HeroSection";
 
 function NotFound() {
   return (
@@ -18,9 +19,21 @@ function App() {
     <>
       <NavBar />
       <Routes>
-        <Route path="/" element={<ItemListContainer />} />
+        {/* 🏠 Home con Hero + catálogo */}
+        <Route
+          path="/"
+          element={
+            <>
+              <HeroSection />
+              <ItemListContainer />
+            </>
+          }
+        />
+        {/* 🧩 Categorías */}
         <Route path="/category/:categoryId" element={<ItemListContainer />} />
+        {/* 🛍️ Detalle de producto */}
         <Route path="/item/:id" element={<ItemDetailContainer />} />
+        {/* 🚫 Página no encontrada */}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
@@ -28,4 +41,3 @@ function App() {
 }
 
 export default App;
-
