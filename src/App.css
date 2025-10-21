@@ -36,7 +36,7 @@ nav ul li a:hover {
 
 .hero {
   position: relative;
-  background-image: url("/images/fondo-donas.jpg"); 
+  background-image: url("/assets/herodonas.avif"); 
   background-size: cover;
   background-position: center;
   min-height: 90vh;
@@ -131,6 +131,114 @@ nav ul li a:hover {
   padding: 0.5rem 1.2rem;
   border-radius: 20px;
 }
+
+/*Catalogo*/
+
+.catalogo {
+  text-align: center;
+  padding: 2rem 1rem;
+  background-color: #fffaf6;
+  color: #3e2723;
+}
+
+.catalogo h2 {
+  font-size: 2rem;
+  color: #4e342e;
+  margin-bottom: 0.5rem;
+}
+
+.catalogo p {
+  color: #6d4c41;
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.card-producto {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  max-width: 280px;
+}
+
+.card-producto:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-producto img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 0.75rem;
+}
+
+.card-producto h3 {
+  font-size: 1.1rem;
+  margin: 0.5rem 0;
+  color: #5d4037;
+}
+
+.card-producto .descripcion {
+  font-size: 0.9rem;
+  color: #8d6e63;
+  margin-bottom: 0.5rem;
+}
+
+.card-producto .precio {
+  font-weight: bold;
+  color: #d17c5f;
+  margin-bottom: 0.75rem;
+}
+
+.card-producto button {
+  background-color: #f48fb1;
+  border: none;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.card-producto button:hover {
+  background-color: #ec407a;
+}
+
+/* === Responsivo === */
+@media (max-width: 768px) {
+  .catalogo h2 {
+    font-size: 1.6rem;
+  }
+
+  .grid-productos {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid-productos {
+    grid-template-columns: 1fr;
+  }
+
+  .card-producto {
+    max-width: 90%;
+  }
+}
+
 
 /*CardWidget*/
 

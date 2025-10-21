@@ -1,3 +1,4 @@
+import "./App.css";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
@@ -19,7 +20,7 @@ function App() {
     <>
       <NavBar />
       <Routes>
-        {/* 🏠 Home con Hero + catálogo */}
+        {}
         <Route
           path="/"
           element={
@@ -29,11 +30,11 @@ function App() {
             </>
           }
         />
-        {/* 🧩 Categorías */}
+        {}
         <Route path="/category/:categoryId" element={<ItemListContainer />} />
-        {/* 🛍️ Detalle de producto */}
+        {}
         <Route path="/item/:id" element={<ItemDetailContainer />} />
-        {/* 🚫 Página no encontrada */}
+        {}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

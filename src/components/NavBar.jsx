@@ -23,7 +23,7 @@ export default function NavBar() {
           <li><NavLink to="/" end>Home</NavLink></li>
           {categories.map(cat => (
             <li key={cat.id}>
-              {/* Para 'all' vamos a la raíz; para otras, a /category/:id */}
+              {}
               <NavLink to={cat.id === "all" ? "/" : `/category/${cat.id}`}>
                 {cat.label}
               </NavLink>
