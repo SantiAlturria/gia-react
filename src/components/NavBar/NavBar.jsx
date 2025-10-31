@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import CartWidget from "./CartWidget";
+import CartWidget from "../CartWidget";
 import logo from "../assets/logodonas.jpg";
 
 const categories = [

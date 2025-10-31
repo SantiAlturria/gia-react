@@ -1,9 +1,9 @@
-import "./App.css";
+import "./styles/index.css";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar";
-import ItemListContainer from "./components/ItemListContainer";
-import ItemDetailContainer from "./components/ItemDetailContainer";
+import NavBar from "./components/NavBar/NavBar.css";
+import ItemListContainer from "./pages/ItemListContainer";
+import ItemDetailContainer from "./pages/ItemDetailContainer";
 import HeroSection from "./components/HeroSection";
 
 function NotFound() {
