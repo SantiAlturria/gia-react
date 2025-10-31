@@ -1,60 +1,55 @@
-// src/components/ItemListContainer.jsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { fetchProducts } from "../data/products";
-import "../App.css";
+import React, { useEffect, useState } from "react"; 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebaseConfig";
 
-export default function ItemListContainer() {
-  const { categoryId } = useParams();
+export default function Catalogo() {
   const [productos, setProductos] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(true);
-    const categoria = categoryId === undefined || categoryId === "all" ? null : categoryId;
-    fetchProducts(categoria)
-      .then((data) => setProductos(data))
-      .catch(() => setProductos([]))
-      .finally(() => setLoading(false));
-  }, [categoryId]);
+    const obtenerProductos = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "productos"));
+        const productosFirebase = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setProductos(productosFirebase);
+      } catch (error) {
+        console.error("Error al obtener productos:", error);
+      }
+    };
 
-  if (loading) {
-    return (
-      <main style={{ padding: 20, textAlign: "center" }}>
-        <p>Cargando productos...</p>
-      </main>
-    );
-  }
+    obtenerProductos();
+  }, []);
 
   return (
-    <section className="catalogo">
-      <h2>Bienvenidos a Donas & Rosquitas</h2>
-      <p>
-        Endulzá tu día con nuestras donas y rosquitas artesanales, hechas con amor cada mañana.
-      </p>
+    <div>
+      <h1>Catálogo</h1>
+      <div className="catalogo">
+        {productos.length === 0 ? (
+          <p>Cargando productos...</p>
+        ) : (
+          productos.map((prod) => (
+            <div key={prod.id} className="card">
+              <h3>{prod.Nombre}</h3>
+              <p>Categoría: {prod.Categoria}</p>
+              <p>Precio: ${prod.Precio}</p>
+              <p>Stock: {prod.Stock}</p>
 
-      <div className="grid-productos">
-        {productos.map((p) => (
-          <div key={p.id} className="card-producto">
-            <img
-              src={
-                p.category === "donas"
-                  ? "https://i.imgur.com/6V4kGgV.jpg"
-                  : p.category === "rosquitas"
-                  ? "https://i.imgur.com/UB1Qx9S.jpg"
-                  : "https://i.imgur.com/RtxjGzP.jpg"
-              }
-              alt={p.title}
-            />
-            <h3>{p.title}</h3>
-            <p className="descripcion">{p.description}</p>
-            <p className="precio">${p.price}</p>
-            <button>Ver más</button>
-          </div>
-        ))}
+              {/*variantes si existen */}
+              {prod.variantes && prod.variantes.length > 0 && (
+                <select>
+                  {prod.variantes.map((v, index) => (
+                    <option key={index}>
+                      {v.nombre} - ${v.precio}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          ))
+        )}
       </div>
-
-      {productos.length === 0 && <p>No hay productos en esta categoría.</p>}
-    </section> 
+    </div>
   );
 }

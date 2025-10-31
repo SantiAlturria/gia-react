@@ -20,7 +20,6 @@ function App() {
     <>
       <NavBar />
       <Routes>
-        {}
         <Route
           path="/"
           element={
@@ -30,11 +29,8 @@ function App() {
             </>
           }
         />
-        {}
         <Route path="/category/:categoryId" element={<ItemListContainer />} />
-        {}
         <Route path="/item/:id" element={<ItemDetailContainer />} />
-        {}
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

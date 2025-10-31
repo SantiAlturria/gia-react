@@ -1,10 +1,11 @@
+/* Reset y configuración global */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Poppins", sans-serif;
 }
 
+/* Estilos base */
 body {
   background-color: #faf8f6;
   color: #333;
@@ -84,7 +85,6 @@ h2 {
 .producto a:hover {
   text-decoration: underline;
 }
-
 
 .detalle {
   background-color: #fff;

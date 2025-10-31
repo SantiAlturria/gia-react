@@ -1,37 +1,25 @@
 import React from "react";
-import "../App.css";
+import "../HeroSection.css";
 
 export default function HeroSection() {
   return (
     <section className="hero">
-      <div className="hero__overlay">
-        <div className="hero__content">
-          <span className="hero__tag">Horneado fresco cada día</span>
-          <h2 className="hero__subtitle">Endulzá tu día con nuestras</h2>
-          <h1 className="hero__title">Donas Artesanales</h1>
-
-          <p className="hero__text">
-            Descubrí el sabor auténtico de nuestras donas y rosquitas,
-            elaboradas con ingredientes premium y mucho amor. Cada bocado es una
-            experiencia única.
-          </p>
-
-          <div className="hero__buttons">
-            <button className="btn btn-primary">Explorar productos</button>
-            <button className="btn btn-outline">Ver menú completo</button>
+      <div className="hero-overlay">
+        <div className="hero-content">
+          <h1>Rosquitas & Donas</h1>
+          <p>¡Hecho con amor, hecho todas las mañanas!</p>
+          <div className="hero-buttons">
+            <button className="btn-primary">Explorar catálogo</button>
+            <button className="btn-secondary">Ver productos</button>
           </div>
-
-          <div className="hero__stats">
-            <div className="stat">500+ <span>Clientes felices</span></div>
-            <div className="stat">+6 <span>Variedades</span></div>
-            <div className="stat">100% <span>Artesanal</span></div>
-          </div>
-
-          <div className="hero__price">
-            <button className="btn btn-small">Desde $200</button>
+          <div className="hero-info">
+            <span>+8 Variedades</span>
+            <span>+5 Años juntos</span>
+            <span>100% Casero</span>
           </div>
         </div>
       </div>
     </section>
   );
 }
+
