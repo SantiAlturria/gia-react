@@ -5,7 +5,7 @@
   align-items: center;
   background-color: #FFFFFF; 
   padding: 1rem 2rem;
-  border-bottom: 2px solid #E879A2; 
+  border-bottom: 45px solid #E879A2; 
   font-family: 'Roboto', sans-serif;
 }
 
@@ -19,7 +19,7 @@
 }
 
 .navbar .logo img {
-  height: 40px; /* Ajuste según su logo */
+  height: 10px; /* Ajuste según su logo */
   margin-right: 0.5rem;
 }
 
@@ -34,7 +34,7 @@
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 9999px; 
-  transition: all 0.3s ease;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .navbar .nav-links a:hover {
