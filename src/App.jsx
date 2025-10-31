@@ -1,17 +1,17 @@
 import "./styles/index.css";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import NavBar from "./components/NavBar/NavBar.css";
-import ItemListContainer from "./pages/ItemListContainer";
-import ItemDetailContainer from "./pages/ItemDetailContainer";
-import HeroSection from "./components/HeroSection";
+import NavBar from "./components/NavBar/NavBar.jsx";
+import ItemListContainer from "./pages/ItemListContainer.jsx";
+import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
+import HeroSection from "./components/HeroSection/HeroSection.jsx";
 
 function NotFound() {
   return (
     <main style={{ padding: 20 }}>
       <h2>404 — Página no encontrada</h2>
       <p>Revisá el enlace o volvé al inicio.</p>
-    </main>
+    </main> 
   );
 }
 

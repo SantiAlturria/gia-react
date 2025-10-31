@@ -1,33 +1,57 @@
-/* NavBar */
-nav {
+/* Navbar */
+.navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: rgb(255, 180, 0);
-  padding: 10px 20px;
-  color: white;
+  background-color: #FFFFFF; 
+  padding: 1rem 2rem;
+  border-bottom: 2px solid #E879A2; 
+  font-family: 'Roboto', sans-serif;
 }
 
-nav img {
-  height: 50px;
-}
-
-nav ul {
-  list-style: none;
+.navbar .logo {
   display: flex;
-  gap: 20px;
-  margin: 0;
-  padding: 0;
-}
-
-nav ul li a {
-  color: white;
-  text-decoration: none;
+  align-items: center;
   font-weight: bold;
+  font-size: 1.5rem;
+  color: #E879A2;
+  text-decoration: none;
 }
 
-nav ul li a:hover {
+.navbar .logo img {
+  height: 40px; /* Ajuste según su logo */
+  margin-right: 0.5rem;
+}
+
+.navbar .nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar .nav-links a {
   text-decoration: none;
-  color: rgb(255, 209, 102);
-  transition: color 0.3s;
+  color: #E879A2;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px; 
+  transition: all 0.3s ease;
+}
+
+.navbar .nav-links a:hover {
+  background-color: #E879A2;
+  color: #FFFFFF;
+}
+
+/* Carrito */
+.navbar .cart {
+  display: flex;
+  align-items: center;
+  color: #E879A2;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.navbar .cart:hover {
+  color: #FFB6C1; 
 }

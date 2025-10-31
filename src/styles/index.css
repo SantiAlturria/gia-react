@@ -1,12 +1,12 @@
-/* Reset y configuración global */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Estilos base */
 body {
+  font-family: 'Roboto', sans-serif;
+  letter-spacing: -0.02em;
   background-color: #faf8f6;
   color: #333;
   line-height: 1.6;
