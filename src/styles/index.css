@@ -108,3 +108,13 @@ h2 {
 .detalle p {
   color: #555;
 }
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}

@@ -5,6 +5,7 @@ import NavBar from "./components/NavBar/NavBar.jsx";
 import ItemListContainer from "./pages/ItemListContainer.jsx";
 import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
 import HeroSection from "./components/HeroSection/HeroSection.jsx";
+import ProductSection from "./components/Products/Products.jsx";
 
 function NotFound() {
   return (
@@ -25,6 +26,7 @@ function App() {
           element={
             <>
               <HeroSection />
+              <ProductSection />
               <ItemListContainer />
             </>
           }

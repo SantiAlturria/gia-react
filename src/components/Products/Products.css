@@ -1,0 +1,84 @@
+.product-section {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff0f3;
+}
+
+.mini-description {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #555;
+  text-transform: uppercase;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+}
+
+.cta-button {
+  background-color: #555;
+  color: #ff79a2;
+  padding: 0.8rem 2rem;
+  border: none;
+  border-radius: 30px;
+  font-weight: 700;
+  margin-bottom: 3rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-track {
+  display: flex;
+  overflow: hidden;
+  width: 70%;
+}
+
+.carousel-item {
+  min-width: 200px;
+  margin: 0 10px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.carousel-item.active {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.carousel-item img {
+  width: 100%;
+  border-radius: 15px;
+}
+
+.arrow {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: #ff79a2;
+  font-weight: bold;
+  margin: 0 10px;
+  transition: color 0.3s ease;
+}
+
+.arrow:hover {
+  color: #e0558f;
+}

@@ -5,12 +5,14 @@
   align-items: center;
   justify-content: center;
   height: 100vh;
-  width: 100%;
+  width: 100vw;
   background-image: url("/src/assets/hero.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   overflow: hidden;
+  margin: 0; 
+  padding: 0
 }
 
 .hero-overlay {
@@ -23,16 +25,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
   z-index: 1;
 }
 
 .hero-content {
-  max-width: 600px;
+  width: 100%; /* 🔹 permite que se expanda */
+  max-width: none; /* 🔹 elimina el límite */
   text-align: center;
   color: #333;
   z-index: 2;
   position: relative;
+  padding: 0 2rem; /* 🔹 un poco de espacio interno para no pegar al borde */
 }
 
 .hero-content h1 {
@@ -41,48 +44,46 @@
 }
 
 .hero-content p {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.07em;
+  color: #555;
+  text-shadow: #555 1px 1px 2px;
 }
 
 .hero-buttons {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 5rem;
   justify-content: center;
   flex-wrap: wrap;
+  font-size: 1.5rem;
+  font-weight: 800;
 }
 
-.btn-primary {
-  background-color: #555;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-.btn-primary:hover {
-  background-color: #333;
-}
-
+.btn-primary,
 .btn-secondary {
   background-color: white;
-  color: #E879A2;
-  border: 2px solid #E879A2;
+  color: #e879a2;
+  border: 2px solid #e879a2;
   padding: 0.8rem 1.5rem;
-  border-radius: 25px;
+  border-radius: 35px;
   cursor: pointer;
   transition: 0.3s;
+  box-shadow: 0px 14px 14px rgba(0, 0, 0, 0.25);
+  letter-spacing: -0.05em;
 }
 
+.btn-primary:hover,
 .btn-secondary:hover {
-  background-color: #E879A2;
-  color: white;
+  background-color: #575757;
+  border-color: #575757;
 }
+
 
 .hero-info {
+  font-size: 1.5rem;
   display: flex;
   gap: 1rem;
   justify-content: center;
@@ -90,12 +91,16 @@
 }
 
 .hero-info span {
-  background-color: #E879A2;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 15px;
+  font-size: 2rem;
+  background-color: #e879a2;
+  color: hsl(338, 92%, 90%);
+  text-shadow: #848383 1px 1px 2px;
+  padding: 2rem 3.5rem;
+  border-radius: 35px;
   font-weight: bold;
+  box-shadow: 0px 14px 14px rgba(0, 0, 0, 0.25);
 }
+
 
 /* Media Queries */
 @media (max-width: 1024px) {

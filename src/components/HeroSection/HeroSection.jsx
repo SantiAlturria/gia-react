@@ -13,8 +13,8 @@ export default function HeroSection() {
             <button className="btn-secondary">Ver productos</button>
           </div>
           <div className="hero-info">
-            <span>+8 Variedades</span>
-            <span>+5 Años juntos</span>
+            <span>+ 8 Variedades</span>
+            <span>+ 5 Años juntos</span>
             <span>100% Casero</span>
           </div>
         </div>

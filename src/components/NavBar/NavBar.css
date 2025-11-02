@@ -5,8 +5,19 @@
   align-items: center;
   background-color: #FFFFFF; 
   padding: 1rem 2rem;
-  border-bottom: 45px solid #E879A2; 
+  border-bottom: 2px solid #E879A2; 
   font-family: 'Roboto', sans-serif;
+}
+
+.navbar {
+  position: fixed;     /* Lo fija en la pantalla */
+  top: 0;              /* Lo alinea al borde superior */
+  left: 0;
+  width: 100%;         /* Que ocupe todo el ancho */
+  z-index: 1000;       /* Lo pone por encima del contenido */
+  background-color: #FFFFFF; /* Necesario para cubrir el fondo al hacer scroll */
+  border-bottom: 2px solid #E879A2;
+  padding: 1rem 2rem;
 }
 
 .navbar .logo {
@@ -31,27 +42,40 @@
 .navbar .nav-links a {
   text-decoration: none;
   color: #E879A2;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  padding: 0.2rem 1rem;
+  border: 2px solid #E879A2; 
   border-radius: 9999px; 
-  transition: background-color 0.3s, color 0.3s;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  
 }
 
 .navbar .nav-links a:hover {
-  background-color: #E879A2;
-  color: #FFFFFF;
+  border: 2px solid #FDCEDF; 
+  background-color: #FDCEDF;
+  color:  #E879A2;
 }
+
 
 /* Carrito */
 .navbar .cart {
   display: flex;
   align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  border: 2px solid #E879A2;
+  border-radius: 50%;
   color: #E879A2;
   font-size: 1.3rem;
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .navbar .cart:hover {
-  color: #FFB6C1; 
+   border: 2px solid #FDCEDF; 
+  background-color: #FDCEDF;
+  color:  #E879A2;
 }
+
