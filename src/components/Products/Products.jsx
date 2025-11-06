@@ -1,4 +1,4 @@
-// ProductSection.jsx
+
 import React, { useState } from "react";
 import "./Products.css";
 import product1 from "../../assets/product1.jpg";

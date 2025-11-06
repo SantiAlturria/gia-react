@@ -29,13 +29,13 @@
 }
 
 .hero-content {
-  width: 100%; /* 🔹 permite que se expanda */
-  max-width: none; /* 🔹 elimina el límite */
+  width: 100%; 
+  max-width: none; 
   text-align: center;
   color: #333;
   z-index: 2;
   position: relative;
-  padding: 0 2rem; /* 🔹 un poco de espacio interno para no pegar al borde */
+  padding: 0 2rem; 
 }
 
 .hero-content h1 {

@@ -1,0 +1,66 @@
+.productos-section {
+  background-color: #f9b9d0;
+  padding: 4rem 2rem;
+  text-align: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+.productos-titulo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  justify-items: center;
+}
+
+.producto-card {
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.1);
+  width: 230px;
+  padding: 1.2rem;
+  transition: transform 0.2s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-5px);
+}
+
+.producto-img {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+}
+
+.producto-nombre {
+  color: #d94a7a;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.producto-precio {
+  color: #444;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.producto-boton {
+  background-color: #e879a2;
+  border: none;
+  color: #fff;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.producto-boton:hover {
+  background-color: #d15d8a;
+}

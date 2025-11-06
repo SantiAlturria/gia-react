@@ -1,41 +1,46 @@
-/* Navbar */
+/* Navbar */ 
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #FFFFFF; 
-  padding: 1rem 2rem;
-  border-bottom: 2px solid #E879A2; 
-  font-family: 'Roboto', sans-serif;
-}
-
-.navbar {
-  position: fixed;     /* Lo fija en la pantalla */
-  top: 0;              /* Lo alinea al borde superior */
+  position: fixed;          /* Lo fija en la pantalla */
+  top: 0;
   left: 0;
-  width: 100%;         /* Que ocupe todo el ancho */
-  z-index: 1000;       /* Lo pone por encima del contenido */
-  background-color: #FFFFFF; /* Necesario para cubrir el fondo al hacer scroll */
+  width: 100%;
+  z-index: 1000;
+  background-color: #FFFFFF;
   border-bottom: 2px solid #E879A2;
-  padding: 1rem 2rem;
+  padding: 0.75rem 2rem;    /* un poco menos de padding para equilibrio */
+  font-family: 'Roboto', sans-serif;
+  height: 90px;             /* altura controlada del navbar */
+  box-sizing: border-box;
 }
 
+/* Logo */
 .navbar .logo {
   display: flex;
   align-items: center;
+  text-decoration: none;
+  color: #E879A2;
   font-weight: bold;
   font-size: 1.5rem;
-  color: #E879A2;
-  text-decoration: none;
+  padding: 0;               /* sin padding que empuje la barra */
+  margin: 0;
 }
 
+/* Imagen del logo */
 .navbar .logo img {
-  height: 10px; /* Ajuste según su logo */
-  margin-right: 0.5rem;
+  display: block;
+  height: 89px;             /* altura equilibrada del logo */
+  width: auto;
+  object-fit: contain;
+  max-height: 100%;
 }
 
+/* Enlaces */
 .navbar .nav-links {
   display: flex;
+  align-items: center;
   gap: 1.5rem;
 }
 
@@ -45,18 +50,16 @@
   font-size: 1.5rem;
   font-weight: 800;
   padding: 0.2rem 1rem;
-  border: 2px solid #E879A2; 
-  border-radius: 9999px; 
+  border: 2px solid #E879A2;
+  border-radius: 9999px;
   transition: background-color 0.3s ease, color 0.3s ease;
-  
 }
 
 .navbar .nav-links a:hover {
   border: 2px solid #FDCEDF; 
   background-color: #FDCEDF;
-  color:  #E879A2;
+  color: #E879A2;
 }
-
 
 /* Carrito */
 .navbar .cart {
@@ -74,8 +77,24 @@
 }
 
 .navbar .cart:hover {
-   border: 2px solid #FDCEDF; 
+  border: 2px solid #FDCEDF; 
   background-color: #FDCEDF;
-  color:  #E879A2;
+  color: #E879A2;
 }
 
+/* Responsivo */
+@media (max-width: 768px) {
+  .navbar {
+    height: 75px;
+    padding: 0.5rem 1.5rem;
+  }
+
+  .navbar .logo img {
+    height: 45px;
+  }
+
+  .navbar .nav-links a {
+    font-size: 1.2rem;
+    padding: 0.2rem 0.8rem;
+  }
+}
