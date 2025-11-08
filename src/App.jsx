@@ -27,7 +27,6 @@ function App() {
           element={
             <>
               <HeroSection />
-              <ProductsSection />
               <ItemListContainer />
               <ProductsList />
             </>

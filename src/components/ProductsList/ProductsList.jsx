@@ -29,9 +29,17 @@ export default function ProductList() {
       <div className="productos-grid">
         {productos.map((prod) => (
           <div key={prod.id} className="producto-card">
-            <img src={prod.imagen} alt={prod.nombre} className="producto-img" />
-            <h3 className="producto-nombre">{prod.nombre}</h3>
-            <p className="producto-precio">${prod.precio}</p>
+            <img src={prod.image} alt={prod.name} className="producto-img" />
+            <h3 className="producto-nombre">{prod.name}</h3>
+            <p className="producto-categoria">{prod.category}</p>
+
+            {/* Mostrar precio mínimo o primer precio */}
+            {prod.variants && prod.variants.length > 0 && (
+              <p className="producto-precio">
+                Desde ${prod.variants[0].price}
+              </p>
+            )}
+
             <div className="producto-controles">
               <button className="producto-boton">Agregar al carrito</button>
             </div>
