@@ -28,10 +28,5 @@ export default function ItemListContainer() {
 
   if (loading) return <p className="loading">Cargando productos...</p>;
 
-  return (
-    <section className="catalogo-section">
-      <h1 className="catalogo-titulo">Catálogo</h1>
-      <ItemList productos={productos} />
-    </section>
-  );
+  return <ItemList productos={productos} />;
 }

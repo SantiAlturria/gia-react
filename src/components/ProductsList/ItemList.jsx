@@ -1,28 +1,24 @@
 import React from "react";
 import "./ProductsList.css";
+import { useCart } from "../../context/CartContext";
+
 
 export default function ItemList({ productos }) {
+  const { addToCart } = useCart();
+
   return (
-    <div className="productos-grid">
+    <div className="productos-container">
       {productos.map((prod) => (
         <div key={prod.id} className="producto-card">
-          <img
-            src={prod.image}
-            alt={prod.name}
-            className="producto-img"
-          />
-          <h3 className="producto-nombre">{prod.name}</h3>
-          <p className="producto-categoria">{prod.category}</p>
-
-          {prod.variants && prod.variants.length > 0 && (
-            <p className="producto-precio">
-              Desde ${prod.variants[0].price} 
-            </p>
-          )}   
-
-          <div className="producto-controles">
-            <button className="producto-boton">Agregar al carrito</button>
-          </div>
+          <img src={prod.image} alt={prod.name} className="producto-imagen" />
+          <h3>{prod.name}</h3>
+          <p>${prod.price}</p>
+          <button
+            className="producto-boton"
+            onClick={() => addToCart(prod)}
+          >
+            Agregar al carrito
+          </button>
         </div>
       ))}
     </div>
