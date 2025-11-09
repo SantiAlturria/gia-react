@@ -1,25 +1,44 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import CartWidget from "../CartWidget";
+import CartSidebar from "../CartSidebar/CartSidebar";
 import logo from "../../assets/Logo.svg";
 import "./NavBar.css";
+import { useCart } from "../../context/CartContext";
 
-export default function NavBar({ cartCount = 0 }) {
+export default function NavBar() {
+  const { cartItems, totalItems, updateQuantity, clearCart } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const toggleCart = () => setIsCartOpen(prev => !prev);
+  const closeCart = () => setIsCartOpen(false);
+
   return (
-    <nav className="navbar">
-      <NavLink to="/" className="logo">
-        <img src={logo} alt="Rosquitas & Donas" />
-      </NavLink>
+    <>
+      <nav className="navbar">
+        <NavLink to="/" className="logo">
+          <img src={logo} alt="Rosquitas & Donas" />
+        </NavLink>
 
-      <div className="nav-links">
-        <a href="#catalogo">Catálogo</a>
-        <a href="#nosotros">Sobre Nosotros</a>
-        <a href="#contacto">Contacto</a>
-      </div>
+        <div className="nav-links">
+          <a href="#catalogo">Catálogo</a>
+          <a href="#nosotros">Sobre Nosotros</a>
+          <a href="#contacto">Contacto</a>
+        </div>
 
-      <div className="cart-container cart">
-        <CartWidget count={cartCount} />
-      </div>
-    </nav>
+        <div className="cart-container cart" onClick={toggleCart}>
+          <CartWidget count={totalItems} />
+        </div>
+      </nav>
+
+      <CartSidebar
+        isOpen={isCartOpen}
+        onClose={closeCart}
+        cartItems={cartItems}       // ✅ los del contexto
+        updateQuantity={updateQuantity}
+        clearCart={clearCart}
+        shippingConfig={{ zones: [], defaultShipping: 2000 }}
+      />
+    </>
   );
 }
