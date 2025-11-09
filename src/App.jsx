@@ -2,11 +2,13 @@ import "./styles/index.css";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar/NavBar.jsx";
+import ProductSection from "./components/Carrusel/Carrusel.jsx";
 import ItemListContainer from "./pages/ItemListContainer.jsx";
 import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
 import HeroSection from "./components/HeroSection/HeroSection.jsx";
 import ProductsList from "./components/ProductsList/ProductsList.jsx";
 import { useCart } from "./context/CartContext.jsx";
+
 
 function NotFound() {
   return (
@@ -30,8 +32,8 @@ export default function App() {
           element={
             <>
               <HeroSection />
+              <ProductSection /> 
               <ItemListContainer addToCart={addToCart} />
-              <ProductsList addToCart={addToCart} />
             </>
           }
         />

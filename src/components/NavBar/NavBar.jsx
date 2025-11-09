@@ -17,7 +17,7 @@ export default function NavBar({ cartCount = 0 }) {
         <a href="#contacto">Contacto</a>
       </div>
 
-      <div className="cart-container">
+      <div className="cart-container cart">
         <CartWidget count={cartCount} />
       </div>
     </nav>
