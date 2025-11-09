@@ -5,7 +5,7 @@ import NavBar from "./components/NavBar/NavBar.jsx";
 import ItemListContainer from "./pages/ItemListContainer.jsx";
 import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
 import HeroSection from "./components/HeroSection/HeroSection.jsx";
-import ProductSection from "./components/Products/Products.jsx";
+import ProductSection from "./components/Carrusel/Carrusel.jsx";
 import ProductsList from "./components/ProductsList/ProductsList.jsx";
 
 function NotFound() {

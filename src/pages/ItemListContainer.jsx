@@ -1,55 +1,37 @@
-import React, { useEffect, useState } from "react"; 
+import React, { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../data/firebaseConfig";
+import ItemList from "../components/ProductsList/ItemList";
 
-export default function Catalogo() {
+export default function ItemListContainer() {
   const [productos, setProductos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const obtenerProductos = async () => {
       try {
         const querySnapshot = await getDocs(collection(db, "productos"));
-        const productosFirebase = querySnapshot.docs.map(doc => ({
+        const productosFirebase = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setProductos(productosFirebase);
       } catch (error) {
         console.error("Error al obtener productos:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     obtenerProductos();
   }, []);
 
-  return (
-    <div>
-      <h1>Catálogo</h1>
-      <div className="catalogo">
-        {productos.length === 0 ? (
-          <p>Cargando productos...</p>
-        ) : (
-          productos.map((prod) => (
-            <div key={prod.id} className="card">
-              <h3>{prod.Nombre}</h3>
-              <p>Categoría: {prod.Categoria}</p>
-              <p>Precio: ${prod.Precio}</p>
-              <p>Stock: {prod.Stock}</p>
+  if (loading) return <p className="loading">Cargando productos...</p>;
 
-              {/*variantes si existen */}
-              {prod.variantes && prod.variantes.length > 0 && (
-                <select>
-                  {prod.variantes.map((v, index) => (
-                    <option key={index}>
-                      {v.nombre} - ${v.precio}
-                    </option>
-                  ))}
-                </select>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+  return (
+    <section className="catalogo-section">
+      <h1 className="catalogo-titulo">Catálogo</h1>
+      <ItemList productos={productos} />
+    </section>
   );
 }

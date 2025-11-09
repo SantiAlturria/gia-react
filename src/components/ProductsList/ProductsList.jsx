@@ -18,7 +18,7 @@ export default function ProductList() {
       } catch (error) {
         console.error("Error al cargar productos:", error);
       }
-    };
+    }; 
 
     fetchData();
   }, []);
