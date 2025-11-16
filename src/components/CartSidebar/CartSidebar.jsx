@@ -1,103 +1,130 @@
 // CartSidebar.jsx
+// Componente del sidebar del carrito — maneja items, variantes, envíos y finalización.
+
 import React, { useEffect, useMemo, useState } from "react";
 import "./CartSidebar.css";
+import { useCart } from "../../context/CartContext";
 
 export default function CartSidebar({
   isOpen,
   onClose,
-  cartItems = [],
-  updateQuantity,
-  clearCart,
-  shippingConfig = { zones: [], defaultShipping: 0 }, // pasar desde padre o cargar desde Firebase
-  companyPhone = "549XXXXXXXXX", // reemplazar por su número
+  shippingConfig = { defaultShipping: 0 },
+  companyPhone = "5493534187071",
 }) {
+  // Datos y funciones del carrito desde el contexto global
+  const {
+    cartItems,
+    updateQuantity,
+    updateVariantQuantity,
+    removeFromCart,
+    clearCart,
+    totalItems,
+    subTotal,
+  } = useCart();
+
+  // Estados locales
   const [envioSeleccionado, setEnvioSeleccionado] = useState(false);
-  const [selectedZoneId, setSelectedZoneId] = useState(null);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [countdown, setCountdown] = useState(3);
 
-  // ESC para cerrar
+  // Datos del cliente
+  const [customerName, setCustomerName] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerLocation, setCustomerLocation] = useState("");
+
+  // Cerrar con ESC
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Totales calculados desde cartItems
-  const subTotal = useMemo(() => {
-    return cartItems.reduce((acc, it) => {
-      const price = it.variant?.price ?? it.price ?? 0;
-      return acc + price * (it.quantity || 1);
-    }, 0);
-  }, [cartItems]);
+  // Costo de envío simple (sin zonas)
+  const costoEnvio = envioSeleccionado ? shippingConfig.defaultShipping || 0 : 0;
 
-  // Buscar costo de zona seleccionada
-  const selectedZone = useMemo(() => {
-    return shippingConfig.zones.find((z) => z.id === selectedZoneId) ?? null;
-  }, [shippingConfig.zones, selectedZoneId]);
-
-  const costoEnvio = envioSeleccionado ? (selectedZone ? selectedZone.cost : shippingConfig.defaultShipping || 0) : 0;
+  // Total final
   const total = subTotal + costoEnvio;
 
-  // Genera código de pedido
-  const generateOrderCode = () => {
-    const d = new Date();
-    const YY = d.getFullYear();
-    const MM = String(d.getMonth() + 1).padStart(2, "0");
-    const DD = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    const ss = String(d.getSeconds()).padStart(2, "0");
-    const rand = String(Math.floor(Math.random() * 10000)).padStart(4, "0");
-    return `ORD-${YY}${MM}${DD}-${hh}${mm}${ss}-${rand}`;
+  // ----- Variantes -----
+  const handleVariantInc = (itemId, idx) => {
+    const item = cartItems.find((c) => c.id === itemId);
+    if (!item) return;
+    const current = item.selections[idx].quantity || 0;
+    const max = item.selections[idx].stock ?? 9999;
+    if (current < max) updateVariantQuantity(itemId, idx, current + 1);
   };
 
-  // Armado del mensaje para WhatsApp
-  const buildWhatsAppMessage = (orderCode) => {
-    let text = `Pedido *${orderCode}*\n\nProductos:\n`;
-    cartItems.forEach((it, idx) => {
-      const price = it.variant?.price ?? it.price ?? 0;
-      const variantLabel = it.variant?.label ? ` (${it.variant.label})` : "";
-      text += `${idx + 1}. ${it.name}${variantLabel}\n   Cant: ${it.quantity} x $${price.toLocaleString()} = $${(price * it.quantity).toLocaleString()}\n`;
-    });
-    text += `\nSubtotal: $${subTotal.toLocaleString()}\n`;
-    if (envioSeleccionado) {
-      text += `Envío: $${costoEnvio.toLocaleString()} (${selectedZone ? selectedZone.label : "Zona no seleccionada"})\n`;
-    } else {
-      text += `Retiro en persona: Sí\n`;
-    }
-    text += `Total: $${total.toLocaleString()}\n\n`;
-    if (envioSeleccionado) {
-      text += `Ubicación: ${selectedZone ? selectedZone.label : "Sin zona seleccionada"}\n\n`;
-    }
-    text += `Observaciones: \n`; // espacio para que cliente agregue si luego lo desea
-    text += `\nPor favor responder con el código de pedido: ${orderCode}`;
-    return encodeURIComponent(text);
+  const handleVariantDec = (itemId, idx) => {
+    const item = cartItems.find((c) => c.id === itemId);
+    if (!item) return;
+    const current = item.selections[idx].quantity || 0;
+    if (current > 0) updateVariantQuantity(itemId, idx, current - 1);
   };
 
-  // Finalizar compra: abre whatsapp con el mensaje y limpia carrito (opcional guardar orden en Firestore)
+  // ----- FINALIZAR PEDIDO -----
   const handleFinalize = () => {
-    // Validaciones mínimas
-    if (cartItems.length === 0) return;
-    if (envioSeleccionado && !selectedZone) {
-      alert("Seleccione la ubicación/zona de envío.");
+    if (totalItems === 0) {
+      alert("No hay unidades en el carrito.");
       return;
     }
 
-    const code = generateOrderCode();
-    const waText = buildWhatsAppMessage(code);
+    // Validaciones de cliente si hay envío
+    if (envioSeleccionado) {
+      if (!customerName.trim()) return alert("Ingrese su nombre completo.");
+      if (!customerPhone.trim()) return alert("Ingrese su teléfono.");
+      if (!customerLocation.trim())
+        return alert("Pegue su ubicación de Google Maps.");
+    }
+
+    const code = `ORD-${Date.now()}`;
+
+    // Armar texto para WhatsApp
+    let text = `Pedido *${code}*\n\nProductos:\n`;
+
+    cartItems.forEach((it) => {
+      if (it.selections) {
+        it.selections.forEach((s) => {
+          if (s.quantity && s.quantity > 0) {
+            text += `- ${it.name} (${s.label}) x ${s.quantity} = $${(
+              s.price * s.quantity
+            ).toLocaleString()}\n`;
+          }
+        });
+      } else {
+        text += `- ${it.name} x ${it.quantity} = $${(
+          (it.price || 0) * (it.quantity || 0)
+        ).toLocaleString()}\n`;
+      }
+    });
+
+    text += `\nSubtotal: $${subTotal.toLocaleString()}\n`;
+
+    if (envioSeleccionado) {
+      text += `Envío: $${costoEnvio.toLocaleString()}\n`;
+      text += `\nDatos para entrega:\n`;
+      text += `• Nombre: ${customerName}\n`;
+      text += `• Teléfono: ${customerPhone}\n`;
+      text += `• Ubicación: ${customerLocation}\n`;
+    } else {
+      text += `Retiro en persona: Sí\n`;
+    }
+
+    text += `\nTotal: $${total.toLocaleString()}\n`;
+    text += `\nPor favor responder con el código de pedido: ${code}`;
+
+    const waUrl = `https://api.whatsapp.com/send?phone=${companyPhone}&text=${encodeURIComponent(
+      text
+    )}`;
+
+    // Countdown
     setIsFinalizing(true);
     setCountdown(3);
 
-    // Cuenta regresiva visual
     const interval = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
           clearInterval(interval);
-          // redirige a whatsapp
-          const url = `https://api.whatsapp.com/send?phone=${companyPhone}&text=${waText}`;
-          window.open(url, "_blank");
-          // limpiar carrito
+          window.open(waUrl, "_blank");
           clearCart();
           setIsFinalizing(false);
           onClose();
@@ -113,32 +140,131 @@ export default function CartSidebar({
     <div className="cart-sidebar-overlay" onClick={onClose}>
       <aside className="cart-sidebar" onClick={(e) => e.stopPropagation()}>
         <header className="cart-header">
-          <button className="back-btn" onClick={onClose}>←</button>
-          <h2>Mi carrito</h2>
+          <button className="back-btn" onClick={onClose}>
+            ←
+          </button>
+          <h2>Mi carrito ({totalItems})</h2>
         </header>
 
+        {/* ---------- LISTA DE PRODUCTOS ---------- */}
         <div className="cart-items">
           {cartItems.length === 0 ? (
             <p>Tu carrito está vacío 🛒</p>
           ) : (
             cartItems.map((item) => {
-              const price = item.variant?.price ?? item.price ?? 0;
+              if (item.selections) {
+                return (
+                  <div key={item.id} className="cart-item">
+                    <img src={item.image} className="cart-item-img" />
+
+                    <div className="cart-item-info">
+                      <p>
+                        <strong>{item.name}</strong>
+                      </p>
+
+                      <div className="variants-list">
+                        {item.selections.map((s, idx) => {
+                          const variantSubtotal =
+                            (s.price || 0) * (s.quantity || 0);
+
+                          return (
+                            <div
+                              key={`${item.id}-v-${idx}`}
+                              className="variant-row"
+                            >
+                              <div className="item-controls-row">
+                                <div className="left-controls">
+                                  <div className="quantity-controls">
+                                    <button
+                                      onClick={() =>
+                                        handleVariantDec(item.id, idx)
+                                      }
+                                    >
+                                      −
+                                    </button>
+                                    <span className="count-label">
+                                      {s.quantity || 0}
+                                    </span>
+                                    <button
+                                      onClick={() =>
+                                        handleVariantInc(item.id, idx)
+                                      }
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+
+                                <div className="right-price">
+                                  ${s.price.toLocaleString()}
+                                </div>
+                              </div>
+
+                              <div className="variant-info">
+                                <p className="variant-label">{s.label}</p>
+                                <p className="variant-subtotal">
+                                  Subtotal: ${variantSubtotal.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
+
+              const price = item.price ?? 0;
+
               return (
                 <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.name} className="cart-item-img" />
+                  <img src={item.image} className="cart-item-img" />
+
                   <div className="cart-item-info">
-                    <p><strong>{item.name}</strong></p>
-                    {item.variant && <p className="variant-label">{item.variant.label}</p>}
-                    <p>${price.toLocaleString()}</p>
-                    <div className="quantity-controls">
-                      <button onClick={() => item.quantity > 1 && updateQuantity(item.id, item.quantity - 1)}>-</button>
-                      <span>{item.quantity}</span>
-                      <button onClick={() => {
-                        const max = item.stock ?? 9999;
-                        if (item.quantity < max) updateQuantity(item.id, item.quantity + 1);
-                      }}>+</button>
+                    <p>
+                      <strong>{item.name}</strong>
+                    </p>
+
+                    <div className="item-controls-row">
+                      <div className="left-controls">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          title="Eliminar producto"
+                        >
+                          🗑
+                        </button>
+
+                        <div className="quantity-controls">
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.id, (item.quantity || 1) - 1)
+                            }
+                          >
+                            -
+                          </button>
+
+                          <span className="count-label">{item.quantity}</span>
+
+                          <button
+                            onClick={() =>
+                              updateQuantity(item.id, (item.quantity || 1) + 1)
+                            }
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="right-price">
+                        ${price.toLocaleString()}
+                      </div>
                     </div>
-                    <p className="item-subtotal">Subtotal: ${ (price * item.quantity).toLocaleString() }</p>
+
+                    <p className="item-subtotal">
+                      Subtotal: $
+                      {(price * (item.quantity || 1)).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               );
@@ -146,49 +272,92 @@ export default function CartSidebar({
           )}
         </div>
 
+        {/* ---------- OPCIONES EXTRA ---------- */}
         {cartItems.length > 0 && (
           <>
-            <button className="clear-cart" onClick={() => {
-              if (confirm("¿Vaciar carrito?")) clearCart();
-            }}>🗑 Vaciar carrito</button>
+            <button
+              className="clear-cart"
+              onClick={() => confirm("¿Vaciar carrito?") && clearCart()}
+            >
+              🗑 Vaciar carrito
+            </button>
 
             <div className="shipping-options">
               <p>Selecciona una opción</p>
+
               <div className="option-buttons">
-                <button className={!envioSeleccionado ? "selected" : ""} onClick={() => { setEnvioSeleccionado(false); setSelectedZoneId(null); }}>
+                <button
+                  className={!envioSeleccionado ? "selected" : ""}
+                  onClick={() => setEnvioSeleccionado(false)}
+                >
                   Retiro en persona
                 </button>
-                <button className={envioSeleccionado ? "selected" : ""} onClick={() => setEnvioSeleccionado(true)}>
+
+                <button
+                  className={envioSeleccionado ? "selected" : ""}
+                  onClick={() => setEnvioSeleccionado(true)}
+                >
                   Solicito envío
                 </button>
               </div>
 
               {envioSeleccionado && (
-                <div style={{ marginTop: 8 }}>
-                  <label>Elija su ubicación / zona</label>
-                  <select value={selectedZoneId ?? ""} onChange={(e) => setSelectedZoneId(e.target.value)}>
-                    <option value="">-- Seleccione zona --</option>
-                    {shippingConfig.zones.map((z) => (
-                      <option key={z.id} value={z.id}>{z.label} — $ {z.cost.toLocaleString()} — ETA: {z.eta ?? "-"}</option>
-                    ))}
-                  </select>
+                <div className="customer-info">
+                  <div className="customer-field">
+                    <label>Nombre completo</label>
+                    <input
+                      type="text"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
+                      placeholder="Ej: Juan Pérez"
+                    />
+                  </div>
+
+                  <div className="customer-field">
+                    <label>Teléfono celular</label>
+                    <input
+                      type="tel"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="Ej: 3512345678"
+                    />
+                  </div>
+
+                  <div className="customer-field">
+                    <label>Ubicación (pegar link de Google Maps)</label>
+                    <input
+                      type="text"
+                      value={customerLocation}
+                      onChange={(e) => setCustomerLocation(e.target.value)}
+                      placeholder="https://maps.app.goo.gl/xxxx"
+                    />
+                  </div>
                 </div>
               )}
             </div>
 
             <div className="cart-summary">
-              <p>Sub Total <span>${subTotal.toLocaleString()}</span></p>
-              <p>Envío <span>${costoEnvio.toLocaleString()}</span></p>
+              <p>
+                Sub Total <span>${subTotal.toLocaleString()}</span>
+              </p>
+              <p>
+                Envío <span>${costoEnvio.toLocaleString()}</span>
+              </p>
               <hr />
-              <p className="total">Total <span>${total.toLocaleString()}</span></p>
+              <p className="total">
+                Total <span>${total.toLocaleString()}</span>
+              </p>
             </div>
 
-            <button className="checkout-btn" onClick={handleFinalize}>Finalizar Compra</button>
+            <button className="checkout-btn" onClick={handleFinalize}>
+              Finalizar Compra
+            </button>
           </>
         )}
 
+        {/* Pantalla de "gracias" */}
         {isFinalizing && (
-          <div style={{ marginTop: 12, textAlign: "center" }}>
+          <div className="finalizing">
             <p>Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...</p>
           </div>
         )}
