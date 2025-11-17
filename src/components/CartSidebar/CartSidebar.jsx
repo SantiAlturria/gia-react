@@ -1,5 +1,5 @@
 // CartSidebar.jsx
-// Componente del sidebar del carrito — maneja items, variantes, envíos y finalización.
+// Sidebar del carrito — Maneja productos, envío y finalización.
 
 import React, { useEffect, useMemo, useState } from "react";
 import "./CartSidebar.css";
@@ -11,7 +11,6 @@ export default function CartSidebar({
   shippingConfig = { defaultShipping: 0 },
   companyPhone = "5493534187071",
 }) {
-  // Datos y funciones del carrito desde el contexto global
   const {
     cartItems,
     updateQuantity,
@@ -22,7 +21,6 @@ export default function CartSidebar({
     subTotal,
   } = useCart();
 
-  // Estados locales
   const [envioSeleccionado, setEnvioSeleccionado] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
   const [countdown, setCountdown] = useState(3);
@@ -30,7 +28,9 @@ export default function CartSidebar({
   // Datos del cliente
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [customerLocation, setCustomerLocation] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [customerDescription, setCustomerDescription] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("transferencia");
 
   // Cerrar con ESC
   useEffect(() => {
@@ -39,13 +39,13 @@ export default function CartSidebar({
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Costo de envío simple (sin zonas)
-  const costoEnvio = envioSeleccionado ? shippingConfig.defaultShipping || 0 : 0;
-
-  // Total final
+  // Costo de envío
+  const costoEnvio = envioSeleccionado
+    ? shippingConfig.defaultShipping || 0
+    : 0;
   const total = subTotal + costoEnvio;
 
-  // ----- Variantes -----
+  // ------- Variantes -------
   const handleVariantInc = (itemId, idx) => {
     const item = cartItems.find((c) => c.id === itemId);
     if (!item) return;
@@ -61,62 +61,79 @@ export default function CartSidebar({
     if (current > 0) updateVariantQuantity(itemId, idx, current - 1);
   };
 
-  // ----- FINALIZAR PEDIDO -----
   const handleFinalize = () => {
-    if (totalItems === 0) {
-      alert("No hay unidades en el carrito.");
-      return;
-    }
+    if (totalItems === 0) return alert("No hay unidades en el carrito.");
 
-    // Validaciones de cliente si hay envío
     if (envioSeleccionado) {
       if (!customerName.trim()) return alert("Ingrese su nombre completo.");
       if (!customerPhone.trim()) return alert("Ingrese su teléfono.");
-      if (!customerLocation.trim())
-        return alert("Pegue su ubicación de Google Maps.");
+      if (!customerAddress.trim()) return alert("Ingrese su dirección.");
+      if (!customerDescription.trim())
+        return alert("Ingrese una descripción para la entrega.");
+      if (customerDescription.length > 100)
+        return alert("La descripción no puede superar 100 caracteres.");
     }
 
     const code = `ORD-${Date.now()}`;
 
-    // Armar texto para WhatsApp
-    let text = `Pedido *${code}*\n\nProductos:\n`;
+    // ---------- MENSAJE BONITO ----------
+    let text = `
+🛍️ *Nuevo pedido recibido*
+Código: *${code}*
 
-    cartItems.forEach((it) => {
-      if (it.selections) {
-        it.selections.forEach((s) => {
-          if (s.quantity && s.quantity > 0) {
-            text += `- ${it.name} (${s.label}) x ${s.quantity} = $${(
-              s.price * s.quantity
-            ).toLocaleString()}\n`;
-          }
-        });
-      } else {
-        text += `- ${it.name} x ${it.quantity} = $${(
-          (it.price || 0) * (it.quantity || 0)
-        ).toLocaleString()}\n`;
-      }
-    });
-
-    text += `\nSubtotal: $${subTotal.toLocaleString()}\n`;
-
-    if (envioSeleccionado) {
-      text += `Envío: $${costoEnvio.toLocaleString()}\n`;
-      text += `\nDatos para entrega:\n`;
-      text += `• Nombre: ${customerName}\n`;
-      text += `• Teléfono: ${customerPhone}\n`;
-      text += `• Ubicación: ${customerLocation}\n`;
-    } else {
-      text += `Retiro en persona: Sí\n`;
+📦 *Productos:*
+${cartItems
+  .map((item) => {
+    // 🔹 Productos con variantes
+    if (Array.isArray(item.selections)) {
+      return item.selections
+        .filter((s) => s.quantity > 0)
+        .map(
+          (s) => `
+• ${item.name}${s.label ? ` - ${s.label}` : ""}
+  Cantidad: ${s.quantity}
+  Precio: $${(s.price || 0).toLocaleString()}
+`
+        )
+        .join("");
     }
 
-    text += `\nTotal: $${total.toLocaleString()}\n`;
-    text += `\nPor favor responder con el código de pedido: ${code}`;
+    // 🔹 Productos sin variantes
+    return `
+• ${item.name}
+  Cantidad: ${item.quantity}
+  Precio: $${(item.price || 0).toLocaleString()}
+`;
+  })
+  .join("")}
+
+💰 *Subtotal:* $${subTotal.toLocaleString()}
+🚚 *Envío:* $${costoEnvio.toLocaleString()}
+🧾 *Total:* *$${total.toLocaleString()}*
+`;
+
+    if (envioSeleccionado) {
+      text += `
+📍 *Datos de entrega:*
+• Nombre: ${customerName}
+• Teléfono: ${customerPhone}
+• Dirección: ${customerAddress}
+• Descripción: ${customerDescription}
+`;
+    } else {
+      text += `\n🏪 Retiro en local\n`;
+    }
+
+    // 👉 AHORA SÍ: Método de pago correctamente agregado
+    text += `\n💰 Método de pago: ${paymentMethod}`;
+
+    text += `\n✔️ *Responder con el código:* ${code}`;
 
     const waUrl = `https://api.whatsapp.com/send?phone=${companyPhone}&text=${encodeURIComponent(
       text
     )}`;
 
-    // Countdown
+    // ---------- Redirección con mini countdown ----------
     setIsFinalizing(true);
     setCountdown(3);
 
@@ -201,7 +218,10 @@ export default function CartSidebar({
                               </div>
 
                               <div className="variant-info">
-                                <p className="variant-label">{s.label}</p>
+                                <p className="variant-label">
+                                  Variante:{" "}
+                                  <strong>{s.label ?? "Sin variante"}</strong>
+                                </p>
                                 <p className="variant-subtotal">
                                   Subtotal: ${variantSubtotal.toLocaleString()}
                                 </p>
@@ -272,93 +292,128 @@ export default function CartSidebar({
           )}
         </div>
 
+        <button
+          className="clear-cart"
+          onClick={() => confirm("¿Vaciar carrito?") && clearCart()}
+        >
+          🗑 Vaciar carrito
+        </button>
+
+        <div className="shipping-options">
+          <p>Selecciona una opción</p>
+
+          <div className="option-buttons">
+            <button
+              className={!envioSeleccionado ? "selected" : ""}
+              onClick={() => setEnvioSeleccionado(false)}
+            >
+              Retiro en persona
+            </button>
+
+            <button
+              className={envioSeleccionado ? "selected" : ""}
+              onClick={() => setEnvioSeleccionado(true)}
+            >
+              Solicito envío
+            </button>
+          </div>
+
+          {envioSeleccionado && (
+            <div className="customer-info">
+              {/* ... campos ... */}
+              <div className="customer-field">
+                <label>Nombre completo</label>
+                <input
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Ej: Juan Pérez"
+                />
+              </div>
+
+              <div className="customer-field">
+                <label>Teléfono celular</label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="Ej: 3512345678"
+                />
+              </div>
+
+              <div className="customer-field">
+                <label>Dirección (calle y número)</label>
+                <input
+                  type="text"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  placeholder="Ej: Av. Siempre Viva 742"
+                />
+              </div>
+
+              <div className="customer-field">
+                <label>Descripción para la entrega (máx 100 caracteres)</label>
+                <input
+                  type="text"
+                  maxLength={100}
+                  value={customerDescription}
+                  onChange={(e) => setCustomerDescription(e.target.value)}
+                  placeholder="Casa blanca portón negro, timbre roto..."
+                />
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="payment-options">
+          <p>Método de pago</p>
+
+          <div className="option-buttons">
+            <button
+              className={paymentMethod === "transferencia" ? "selected" : ""}
+              onClick={() => setPaymentMethod("transferencia")}
+            >
+              Transferencia
+            </button>
+
+            <button
+              className={paymentMethod === "efectivo" ? "selected" : ""}
+              onClick={() => setPaymentMethod("efectivo")}
+            >
+              Efectivo
+            </button>
+          </div>
+        </div>
+
         {/* ---------- OPCIONES EXTRA ---------- */}
         {cartItems.length > 0 && (
           <>
-            <button
-              className="clear-cart"
-              onClick={() => confirm("¿Vaciar carrito?") && clearCart()}
-            >
-              🗑 Vaciar carrito
-            </button>
-
-            <div className="shipping-options">
-              <p>Selecciona una opción</p>
-
-              <div className="option-buttons">
-                <button
-                  className={!envioSeleccionado ? "selected" : ""}
-                  onClick={() => setEnvioSeleccionado(false)}
-                >
-                  Retiro en persona
-                </button>
-
-                <button
-                  className={envioSeleccionado ? "selected" : ""}
-                  onClick={() => setEnvioSeleccionado(true)}
-                >
-                  Solicito envío
-                </button>
+            {/* footer sticky que contiene todo lo necesario */}
+            <div className="cart-footer">
+              <div className="cart-summary">
+                <p>
+                  Sub Total <span>${subTotal.toLocaleString()}</span>
+                </p>
+                <p>
+                  Envío <span>${costoEnvio.toLocaleString()}</span>
+                </p>
+                <hr />
+                <p className="total">
+                  Total <span>${total.toLocaleString()}</span>
+                </p>
               </div>
 
-              {envioSeleccionado && (
-                <div className="customer-info">
-                  <div className="customer-field">
-                    <label>Nombre completo</label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Ej: Juan Pérez"
-                    />
-                  </div>
-
-                  <div className="customer-field">
-                    <label>Teléfono celular</label>
-                    <input
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="Ej: 3512345678"
-                    />
-                  </div>
-
-                  <div className="customer-field">
-                    <label>Ubicación (pegar link de Google Maps)</label>
-                    <input
-                      type="text"
-                      value={customerLocation}
-                      onChange={(e) => setCustomerLocation(e.target.value)}
-                      placeholder="https://maps.app.goo.gl/xxxx"
-                    />
-                  </div>
-                </div>
-              )}
+              <button className="checkout-btn" onClick={handleFinalize}>
+                Finalizar Compra
+              </button>
             </div>
-
-            <div className="cart-summary">
-              <p>
-                Sub Total <span>${subTotal.toLocaleString()}</span>
-              </p>
-              <p>
-                Envío <span>${costoEnvio.toLocaleString()}</span>
-              </p>
-              <hr />
-              <p className="total">
-                Total <span>${total.toLocaleString()}</span>
-              </p>
-            </div>
-
-            <button className="checkout-btn" onClick={handleFinalize}>
-              Finalizar Compra
-            </button>
           </>
         )}
 
-        {/* Pantalla de "gracias" */}
         {isFinalizing && (
           <div className="finalizing">
-            <p>Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...</p>
+            <p>
+              Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...
+            </p>
           </div>
         )}
       </aside>
