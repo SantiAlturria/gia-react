@@ -10,7 +10,7 @@ export default function NavBar() {
   const { cartItems, totalItems, updateQuantity, clearCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const toggleCart = () => setIsCartOpen(prev => !prev);
+  const toggleCart = () => setIsCartOpen((prev) => !prev);
   const closeCart = () => setIsCartOpen(false);
 
   return (
@@ -21,6 +21,22 @@ export default function NavBar() {
         </NavLink>
 
         <div className="nav-links">
+          {/* Categorías con React Router */}
+          <NavLink
+            to="/category/salados"
+            className={({ isActive }) => (isActive ? "active-link" : "")}
+          >
+            Salados
+          </NavLink>
+
+          <NavLink
+            to="/category/dulces"
+            className={({ isActive }) => (isActive ? "active-link" : "")}
+          >
+            Dulces
+          </NavLink>
+
+          {/* Links internos de la landing */}
           <a href="#catalogo">Catálogo</a>
           <a href="#nosotros">Sobre Nosotros</a>
           <a href="#contacto">Contacto</a>
@@ -34,7 +50,7 @@ export default function NavBar() {
       <CartSidebar
         isOpen={isCartOpen}
         onClose={closeCart}
-        cartItems={cartItems}       // ✅ los del contexto
+        cartItems={cartItems} // ✅ los del contexto
         updateQuantity={updateQuantity}
         clearCart={clearCart}
         shippingConfig={{ zones: [], defaultShipping: 2000 }}

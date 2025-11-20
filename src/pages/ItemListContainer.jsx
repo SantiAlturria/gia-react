@@ -1,32 +1,47 @@
 import React, { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../data/firebaseConfig";
+import { useParams } from "react-router-dom";
+
+// Services
+import { fetchAllProducts, fetchProductsByCategory } from "../data/firebase";
+
+// Mensajes
+import { useMessage } from "../hooks/useMessage";
+import Message from "../components/Message/Message";
+
 import ItemList from "../components/ProductsList/ProductsList";
 
 export default function ItemListContainer() {
+  const { categoryId } = useParams();
   const [productos, setProductos] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const { message, showMessage } = useMessage();
+
   useEffect(() => {
-    const obtenerProductos = async () => {
+    const obtener = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "productos"));
-        const productosFirebase = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setProductos(productosFirebase);
+        setLoading(true);
+
+        const data = categoryId
+          ? await fetchProductsByCategory(categoryId)
+          : await fetchAllProducts();
+
+        setProductos(data);
       } catch (error) {
-        console.error("Error al obtener productos:", error);
+        showMessage("Error al obtener productos.", "error");
       } finally {
         setLoading(false);
       }
     };
 
-    obtenerProductos();
-  }, []);
+    obtener();
+  }, [categoryId]);
 
-  if (loading) return <p className="loading">Cargando productos...</p>;
-
-  return <ItemList productos={productos} />;
+  return (
+    <>
+      {loading && <p className="loading">Cargando productos...</p>}
+      {message && <Message type={message.type} text={message.text} />}
+      {!loading && <ItemList productos={productos} />}
+    </>
+  );
 }

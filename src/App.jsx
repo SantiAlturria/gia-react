@@ -8,7 +8,7 @@ import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
 import HeroSection from "./components/HeroSection/HeroSection.jsx";
 import ProductsList from "./components/ProductsList/ProductsList.jsx";
 import { useCart } from "./context/CartContext.jsx";
-
+import Checkout from "./pages/Checkout.jsx";
 
 function NotFound() {
   return (
@@ -32,21 +32,45 @@ export default function App() {
           element={
             <>
               <HeroSection />
-              <ProductSection /> 
+              <ProductSection />
               <ItemListContainer addToCart={addToCart} />
             </>
           }
         />
+
         <Route
           path="/category/:categoryId"
           element={<ItemListContainer addToCart={addToCart} />}
         />
+
         <Route
           path="/item/:id"
           element={<ItemDetailContainer addToCart={addToCart} />}
         />
+
+        {/* ESTA ES LA QUE LE FALTABA */}
+        <Route path="/checkout" element={<Checkout />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
 }
+
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { db } from "./data/firebaseConfig";
+
+async function testFirestore() {
+  try {
+    const ref = collection(db, "orders");
+    const doc = await addDoc(ref, {
+      test: true,
+      createdAt: serverTimestamp()
+    });
+    console.log("Orden creada:", doc.id);
+  } catch (err) {
+    console.error("Error Firestore:", err);
+  }
+}
+
+testFirestore();

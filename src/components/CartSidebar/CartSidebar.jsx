@@ -1,7 +1,5 @@
-// CartSidebar.jsx
-// Sidebar del carrito — Maneja productos, envío y finalización.
-
-import React, { useEffect, useMemo, useState } from "react";
+// CartSidebar.jsx — Sidebar del carrito — Maneja productos, envío y finalización.
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./CartSidebar.css";
 import { useCart } from "../../context/CartContext";
 
@@ -23,7 +21,9 @@ export default function CartSidebar({
 
   const [envioSeleccionado, setEnvioSeleccionado] = useState(false);
   const [isFinalizing, setIsFinalizing] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+  const [countdown, setCountdown] = useState(0);
+  const countdownIntervalRef = useRef(null);
+  const [waUrl, setWaUrl] = useState(null);
 
   // Datos del cliente
   const [customerName, setCustomerName] = useState("");
@@ -39,28 +39,60 @@ export default function CartSidebar({
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Costo de envío
-  const costoEnvio = envioSeleccionado
-    ? shippingConfig.defaultShipping || 0
-    : 0;
+  // Costo de envío y total
+  const costoEnvio = envioSeleccionado ? shippingConfig.defaultShipping || 0 : 0;
   const total = subTotal + costoEnvio;
 
-  // ------- Variantes -------
+  // Handlers variantes
   const handleVariantInc = (itemId, idx) => {
     const item = cartItems.find((c) => c.id === itemId);
-    if (!item) return;
-    const current = item.selections[idx].quantity || 0;
-    const max = item.selections[idx].stock ?? 9999;
+    if (!item || !item.selections) return;
+    const current = item.selections[idx]?.quantity || 0;
+    const max = item.selections[idx]?.stock ?? 9999;
     if (current < max) updateVariantQuantity(itemId, idx, current + 1);
   };
 
   const handleVariantDec = (itemId, idx) => {
     const item = cartItems.find((c) => c.id === itemId);
-    if (!item) return;
-    const current = item.selections[idx].quantity || 0;
+    if (!item || !item.selections) return;
+    const current = item.selections[idx]?.quantity || 0;
     if (current > 0) updateVariantQuantity(itemId, idx, current - 1);
   };
 
+  // Validaciones y armado del texto para WhatsApp
+  const buildWhatsAppText = (code) => {
+    const productsText = cartItems
+      .map((item) => {
+        if (Array.isArray(item.selections)) {
+          return item.selections
+            .filter((s) => (s.quantity || 0) > 0)
+            .map(
+              (s) =>
+                `• ${item.name}${s.label ? ` - ${s.label}` : ""}\n  Cantidad: ${s.quantity}\n  Precio: $${(
+                  s.price || 0
+                ).toLocaleString()}`
+            )
+            .join("\n");
+        }
+        return `• ${item.name}\n  Cantidad: ${item.quantity || 0}\n  Precio: $${(
+          item.price || 0
+        ).toLocaleString()}`;
+      })
+      .join("\n");
+
+    let text = `🛍️ *Nuevo pedido recibido*\nCódigo: *${code}*\n\n📦 *Productos:*\n${productsText}\n\n💰 *Subtotal:* $${subTotal.toLocaleString()}\n🚚 *Envío:* $${costoEnvio.toLocaleString()}\n🧾 *Total:* *$${total.toLocaleString()}*\n`;
+
+    if (envioSeleccionado) {
+      text += `\n📍 *Datos de entrega:*\n• Nombre: ${customerName}\n• Teléfono: ${customerPhone}\n• Dirección: ${customerAddress}\n• Descripción: ${customerDescription}\n`;
+    } else {
+      text += `\n🏪 Retiro en local\n`;
+    }
+
+    text += `\n💰 Método de pago: ${paymentMethod}\n\n✔️ *Responder con el código:* ${code}`;
+    return text;
+  };
+
+  // Inicia el proceso de finalizar: valida y prepara la URL
   const handleFinalize = () => {
     if (totalItems === 0) return alert("No hay unidades en el carrito.");
 
@@ -75,81 +107,69 @@ export default function CartSidebar({
     }
 
     const code = `ORD-${Date.now()}`;
-
-    // ---------- MENSAJE BONITO ----------
-    let text = `
-🛍️ *Nuevo pedido recibido*
-Código: *${code}*
-
-📦 *Productos:*
-${cartItems
-  .map((item) => {
-    // 🔹 Productos con variantes
-    if (Array.isArray(item.selections)) {
-      return item.selections
-        .filter((s) => s.quantity > 0)
-        .map(
-          (s) => `
-• ${item.name}${s.label ? ` - ${s.label}` : ""}
-  Cantidad: ${s.quantity}
-  Precio: $${(s.price || 0).toLocaleString()}
-`
-        )
-        .join("");
-    }
-
-    // 🔹 Productos sin variantes
-    return `
-• ${item.name}
-  Cantidad: ${item.quantity}
-  Precio: $${(item.price || 0).toLocaleString()}
-`;
-  })
-  .join("")}
-
-💰 *Subtotal:* $${subTotal.toLocaleString()}
-🚚 *Envío:* $${costoEnvio.toLocaleString()}
-🧾 *Total:* *$${total.toLocaleString()}*
-`;
-
-    if (envioSeleccionado) {
-      text += `
-📍 *Datos de entrega:*
-• Nombre: ${customerName}
-• Teléfono: ${customerPhone}
-• Dirección: ${customerAddress}
-• Descripción: ${customerDescription}
-`;
-    } else {
-      text += `\n🏪 Retiro en local\n`;
-    }
-
-    // 👉 AHORA SÍ: Método de pago correctamente agregado
-    text += `\n💰 Método de pago: ${paymentMethod}`;
-
-    text += `\n✔️ *Responder con el código:* ${code}`;
-
-    const waUrl = `https://api.whatsapp.com/send?phone=${companyPhone}&text=${encodeURIComponent(
+    const text = buildWhatsAppText(code);
+    const url = `https://api.whatsapp.com/send?phone=${companyPhone}&text=${encodeURIComponent(
       text
     )}`;
 
-    // ---------- Redirección con mini countdown ----------
-    setIsFinalizing(true);
+    // Configuramos finalización controlada por efectos
+    setWaUrl(url);
     setCountdown(3);
-
-    const interval = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(interval);
-          window.open(waUrl, "_blank");
-          clearCart();
-          setIsFinalizing(false);
-          onClose();
-        }
-        return c - 1;
-      });
-    }, 1000);
+    setIsFinalizing(true);
   };
+
+  // Efecto que maneja el countdown y la acción final cuando llega a 0
+  useEffect(() => {
+    if (!isFinalizing) {
+      // Si no está finalizando, limpiar intervalos si hubieran quedado
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+      return;
+    }
+
+    // Si ya hay un intervalo en marcha, no crear otro
+    if (countdownIntervalRef.current) return;
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((c) => Math.max(0, c - 1));
+    }, 1000);
+
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+    };
+  }, [isFinalizing]);
+
+  // Acción que sucede cuando countdown llega a 0
+  useEffect(() => {
+    if (!isFinalizing) return;
+    if (countdown > 0) return;
+
+    // Cleanup del intervalo
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    // Ejecutar las acciones fuera del render
+    if (waUrl) {
+      try {
+        window.open(waUrl, "_blank");
+      } catch (e) {
+        console.error("No se pudo abrir WhatsApp:", e);
+      }
+    }
+
+    // Limpiar carrito y cerrar panel
+    clearCart();
+    setIsFinalizing(false);
+    onClose();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown, isFinalizing, waUrl]); // waUrl incluido para garantizar disponibilidad
 
   if (!isOpen) return null;
 
@@ -157,7 +177,7 @@ ${cartItems
     <div className="cart-sidebar-overlay" onClick={onClose}>
       <aside className="cart-sidebar" onClick={(e) => e.stopPropagation()}>
         <header className="cart-header">
-          <button className="back-btn" onClick={onClose}>
+          <button className="back-btn" onClick={onClose} aria-label="Cerrar carrito">
             ←
           </button>
           <h2>Mi carrito ({totalItems})</h2>
@@ -172,7 +192,7 @@ ${cartItems
               if (item.selections) {
                 return (
                   <div key={item.id} className="cart-item">
-                    <img src={item.image} className="cart-item-img" />
+                    <img src={item.image} alt={item.name} className="cart-item-img" />
 
                     <div className="cart-item-info">
                       <p>
@@ -181,50 +201,37 @@ ${cartItems
 
                       <div className="variants-list">
                         {item.selections.map((s, idx) => {
-                          const variantSubtotal =
-                            (s.price || 0) * (s.quantity || 0);
+                          const variantSubtotal = (s.price || 0) * (s.quantity || 0);
 
                           return (
-                            <div
-                              key={`${item.id}-v-${idx}`}
-                              className="variant-row"
-                            >
+                            <div key={`${item.id}-v-${idx}`} className="variant-row">
                               <div className="item-controls-row">
                                 <div className="left-controls">
                                   <div className="quantity-controls">
                                     <button
-                                      onClick={() =>
-                                        handleVariantDec(item.id, idx)
-                                      }
+                                      onClick={() => handleVariantDec(item.id, idx)}
+                                      aria-label={`Disminuir variante ${idx}`}
                                     >
                                       −
                                     </button>
-                                    <span className="count-label">
-                                      {s.quantity || 0}
-                                    </span>
+                                    <span className="count-label">{s.quantity || 0}</span>
                                     <button
-                                      onClick={() =>
-                                        handleVariantInc(item.id, idx)
-                                      }
+                                      onClick={() => handleVariantInc(item.id, idx)}
+                                      aria-label={`Aumentar variante ${idx}`}
                                     >
                                       +
                                     </button>
                                   </div>
                                 </div>
 
-                                <div className="right-price">
-                                  ${s.price.toLocaleString()}
-                                </div>
+                                <div className="right-price">${(s.price || 0).toLocaleString()}</div>
                               </div>
 
                               <div className="variant-info">
                                 <p className="variant-label">
-                                  Variante:{" "}
-                                  <strong>{s.label ?? "Sin variante"}</strong>
+                                  Variante: <strong>{s.label ?? "Sin variante"}</strong>
                                 </p>
-                                <p className="variant-subtotal">
-                                  Subtotal: ${variantSubtotal.toLocaleString()}
-                                </p>
+                                <p className="variant-subtotal">Subtotal: ${variantSubtotal.toLocaleString()}</p>
                               </div>
                             </div>
                           );
@@ -239,7 +246,7 @@ ${cartItems
 
               return (
                 <div key={item.id} className="cart-item">
-                  <img src={item.image} className="cart-item-img" />
+                  <img src={item.image} alt={item.name} className="cart-item-img" />
 
                   <div className="cart-item-info">
                     <p>
@@ -248,42 +255,36 @@ ${cartItems
 
                     <div className="item-controls-row">
                       <div className="left-controls">
-                        <button
-                          onClick={() => removeFromCart(item.id)}
-                          title="Eliminar producto"
-                        >
+                        <button onClick={() => removeFromCart(item.id)} title="Eliminar producto">
                           🗑
                         </button>
 
                         <div className="quantity-controls">
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, (item.quantity || 1) - 1)
+                              updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))
                             }
+                            aria-label="Disminuir cantidad"
                           >
                             -
                           </button>
 
-                          <span className="count-label">{item.quantity}</span>
+                          <span className="count-label">{item.quantity || 0}</span>
 
                           <button
-                            onClick={() =>
-                              updateQuantity(item.id, (item.quantity || 1) + 1)
-                            }
+                            onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
+                            aria-label="Aumentar cantidad"
                           >
                             +
                           </button>
                         </div>
                       </div>
 
-                      <div className="right-price">
-                        ${price.toLocaleString()}
-                      </div>
+                      <div className="right-price">${price.toLocaleString()}</div>
                     </div>
 
                     <p className="item-subtotal">
-                      Subtotal: $
-                      {(price * (item.quantity || 1)).toLocaleString()}
+                      Subtotal: ${(price * (item.quantity || 0)).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -295,6 +296,7 @@ ${cartItems
         <button
           className="clear-cart"
           onClick={() => confirm("¿Vaciar carrito?") && clearCart()}
+          disabled={cartItems.length === 0}
         >
           🗑 Vaciar carrito
         </button>
@@ -303,24 +305,17 @@ ${cartItems
           <p>Selecciona una opción</p>
 
           <div className="option-buttons">
-            <button
-              className={!envioSeleccionado ? "selected" : ""}
-              onClick={() => setEnvioSeleccionado(false)}
-            >
+            <button className={!envioSeleccionado ? "selected" : ""} onClick={() => setEnvioSeleccionado(false)}>
               Retiro en persona
             </button>
 
-            <button
-              className={envioSeleccionado ? "selected" : ""}
-              onClick={() => setEnvioSeleccionado(true)}
-            >
+            <button className={envioSeleccionado ? "selected" : ""} onClick={() => setEnvioSeleccionado(true)}>
               Solicito envío
             </button>
           </div>
 
           {envioSeleccionado && (
             <div className="customer-info">
-              {/* ... campos ... */}
               <div className="customer-field">
                 <label>Nombre completo</label>
                 <input
@@ -364,6 +359,7 @@ ${cartItems
             </div>
           )}
         </div>
+
         <div className="payment-options">
           <p>Método de pago</p>
 
@@ -375,10 +371,7 @@ ${cartItems
               Transferencia
             </button>
 
-            <button
-              className={paymentMethod === "efectivo" ? "selected" : ""}
-              onClick={() => setPaymentMethod("efectivo")}
-            >
+            <button className={paymentMethod === "efectivo" ? "selected" : ""} onClick={() => setPaymentMethod("efectivo")}>
               Efectivo
             </button>
           </div>
@@ -387,7 +380,6 @@ ${cartItems
         {/* ---------- OPCIONES EXTRA ---------- */}
         {cartItems.length > 0 && (
           <>
-            {/* footer sticky que contiene todo lo necesario */}
             <div className="cart-footer">
               <div className="cart-summary">
                 <p>
@@ -402,8 +394,8 @@ ${cartItems
                 </p>
               </div>
 
-              <button className="checkout-btn" onClick={handleFinalize}>
-                Finalizar Compra
+              <button className="checkout-btn" onClick={handleFinalize} disabled={isFinalizing}>
+                {isFinalizing ? `Redirigiendo... (${countdown})` : "Finalizar Compra"}
               </button>
             </div>
           </>
@@ -411,9 +403,7 @@ ${cartItems
 
         {isFinalizing && (
           <div className="finalizing">
-            <p>
-              Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...
-            </p>
+            <p>Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...</p>
           </div>
         )}
       </aside>

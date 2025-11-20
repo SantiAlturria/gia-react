@@ -13,7 +13,8 @@ export default function ItemCount({ stock = 10, initial = 1, onAdd }) {
         <button onClick={dec}>-</button>
         <span>{count}</span>
         <button onClick={inc}>+</button>
-        <button onClick={add} style={{ marginLeft: 12 }}>Agregar al carrito</button>
+        <button onClick={add} style={{ marginLeft: 12 }} disabled={count <= 0}>Agregar al carrito</button>
+
       </div>
       <small>Stock disponible: {stock}</small>
     </div>

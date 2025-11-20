@@ -6,52 +6,86 @@ export const useCart = () => useContext(CartContext);
 
 const STORAGE_KEY = "rosquitas_cart_v1";
 
-export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  });
+// ====================
+// LOCALSTORAGE SEGURO
+// ====================
+function loadCartFromStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
 
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch (e) {
+    console.error("Carrito corrupto en LocalStorage:", e);
+    return [];
+  }
+}
+
+export function CartProvider({ children }) {
+  const [cartItems, setCartItems] = useState(loadCartFromStorage);
+
+  // Guardar en localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cartItems));
-    } catch {}
+    } catch (e) {
+      console.error("Error saving cart to localStorage:", e);
+    }
   }, [cartItems]);
 
   // ====================
-  // ADD TO CART
+  // ADD TO CART (versión avanzada)
   // ====================
   const addToCart = (product) => {
     setCartItems((prev) => {
       const idx = prev.findIndex((p) => p.id === product.id);
+      const qtyToAdd = product.quantity || 1;
 
-      // Si ya existe
+      // Normalizamos campos para evitar undefined
+      const normalized = {
+        id: product.id,
+        name: product.title ?? product.name ?? "Producto",
+        image: product.image ?? product.images?.[0] ?? null,
+        price: product.price ?? (product.variants?.[0]?.price ?? 0),
+        stock: product.stock ?? null,
+        selectedVariantIndex: product.selectedVariantIndex ?? null,
+      };
+
+      // ===================================
+      // SI EL PRODUCTO YA EXISTE EN EL CARRITO
+      // ===================================
       if (idx >= 0) {
         const updated = [...prev];
         const exists = updated[idx];
 
-        // Si tiene variantes: sumar a la primera variante
+        // Caso: tiene variants
         if (exists.selections) {
-          const sel = exists.selections.map((s, i) =>
-            i === 0 ? { ...s, quantity: s.quantity + 1 } : s
+          const selIndex = normalized.selectedVariantIndex ?? 0;
+
+          const newSelections = exists.selections.map((s, i) =>
+            i === selIndex
+              ? { ...s, quantity: (s.quantity || 0) + qtyToAdd }
+              : s
           );
-          updated[idx] = { ...exists, selections: sel };
+
+          updated[idx] = { ...exists, selections: newSelections };
           return updated;
         }
 
-        // Si NO tiene variantes: sumar cantidad
+        // Caso: producto normal
         updated[idx] = {
           ...exists,
-          quantity: (exists.quantity || 1) + 1,
+          quantity: (exists.quantity || 0) + qtyToAdd,
         };
+
         return updated;
       }
 
-      // No existe → crear
+      // ===================================
+      // SI ES UN PRODUCTO NUEVO CON VARIANTS
+      // ===================================
       if (product.variants && product.variants.length > 0) {
         const selections = product.variants.map((v) => ({
           label: v.label,
@@ -60,36 +94,38 @@ export function CartProvider({ children }) {
           quantity: 0,
         }));
 
-        // A la primera variante le damos 1 unidad por defecto
-        selections[0].quantity = 1;
+        const indexToSet = normalized.selectedVariantIndex ?? 0;
+        selections[indexToSet].quantity = qtyToAdd;
 
         const item = {
-          id: product.id,
-          name: product.name,
-          image: product.image,
+          id: normalized.id,
+          name: normalized.name,
+          image: normalized.image,
           selections,
         };
 
         return [...prev, item];
       }
 
-      // Producto simple
+      // ===================================
+      // NUEVO ITEM SIMPLE
+      // ===================================
       return [
         ...prev,
         {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          price: product.price ?? 0,
-          stock: product.stock ?? null,
-          quantity: 1,
+          id: normalized.id,
+          name: normalized.name,
+          image: normalized.image,
+          price: normalized.price,
+          stock: normalized.stock,
+          quantity: qtyToAdd,
         },
       ];
     });
   };
 
   // ====================
-  // UPDATE QUANTITY (simple)
+  // UPDATE QUANTITY NORMAL
   // ====================
   const updateQuantity = (id, newQty) => {
     setCartItems((prev) =>
@@ -99,7 +135,9 @@ export function CartProvider({ children }) {
             ? { ...p, quantity: Math.max(0, newQty) }
             : p
         )
-        .filter((p) => (p.selections ? true : (p.quantity ?? 0) > 0))
+        .filter((p) =>
+          p.selections ? true : (p.quantity ?? 0) > 0
+        )
     );
   };
 
@@ -140,12 +178,9 @@ export function CartProvider({ children }) {
   const totalItems = useMemo(() => {
     return cartItems.reduce((acc, item) => {
       if (item.selections) {
-        return (
-          acc +
-          item.selections.reduce(
-            (s, v) => s + (v.quantity || 0),
-            0
-          )
+        return acc + item.selections.reduce(
+          (s, v) => s + (v.quantity || 0),
+          0
         );
       }
       return acc + (item.quantity || 0);
@@ -158,12 +193,9 @@ export function CartProvider({ children }) {
   const subTotal = useMemo(() => {
     return cartItems.reduce((acc, item) => {
       if (item.selections) {
-        return (
-          acc +
-          item.selections.reduce(
-            (s, v) => s + (v.price || 0) * (v.quantity || 0),
-            0
-          )
+        return acc + item.selections.reduce(
+          (s, v) => s + (v.price || 0) * (v.quantity || 0),
+          0
         );
       }
       return acc + (item.price || 0) * (item.quantity || 0);
