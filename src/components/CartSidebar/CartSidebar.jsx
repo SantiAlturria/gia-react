@@ -229,7 +229,7 @@ export default function CartSidebar({
 
                               <div className="variant-info">
                                 <p className="variant-label">
-                                  Variante: <strong>{s.label ?? "Sin variante"}</strong>
+                                  Variante: <strong>{s.label ?? s.name ?? "Sin variante"}</strong>
                                 </p>
                                 <p className="variant-subtotal">Subtotal: ${variantSubtotal.toLocaleString()}</p>
                               </div>

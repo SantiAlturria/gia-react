@@ -1,3 +1,4 @@
+
 // CartContext.jsx
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
@@ -38,91 +39,110 @@ export function CartProvider({ children }) {
   // ====================
   // ADD TO CART (versión avanzada)
   // ====================
-  const addToCart = (product) => {
-    setCartItems((prev) => {
-      const idx = prev.findIndex((p) => p.id === product.id);
-      const qtyToAdd = product.quantity || 1;
+  // addToCart (versión final, robusta)
+const addToCart = (product) => {
+  setCartItems((prev) => {
+    const idx = prev.findIndex((p) => p.id === product.id);
+    const qtyToAdd = product.quantity || 1;
 
-      // Normalizamos campos para evitar undefined
-      const normalized = {
-        id: product.id,
-        name: product.title ?? product.name ?? "Producto",
-        image: product.image ?? product.images?.[0] ?? null,
-        price: product.price ?? (product.variants?.[0]?.price ?? 0),
-        stock: product.stock ?? null,
-        selectedVariantIndex: product.selectedVariantIndex ?? null,
-      };
+    // --- Determinar índice de variante si viene nombre en el payload ---
+    let computedVariantIndex = null;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      if (typeof product.selectedVariantIndex === "number") {
+        computedVariantIndex = product.selectedVariantIndex;
+      } else if (typeof product.variant === "string") {
+        const findIdx = product.variants.findIndex(
+          (v) => (v.name ?? v.label) === product.variant
+        );
+        computedVariantIndex = findIdx >= 0 ? findIdx : null;
+      } else if (typeof product.variantName === "string") {
+        const findIdx = product.variants.findIndex(
+          (v) => (v.name ?? v.label) === product.variantName
+        );
+        computedVariantIndex = findIdx >= 0 ? findIdx : null;
+      }
+    }
 
-      // ===================================
-      // SI EL PRODUCTO YA EXISTE EN EL CARRITO
-      // ===================================
-      if (idx >= 0) {
-        const updated = [...prev];
-        const exists = updated[idx];
+    // Normalizamos campos para evitar undefined
+    const normalized = {
+      id: product.id,
+      name: product.title ?? product.name ?? "Producto",
+      image: product.image ?? product.images?.[0] ?? null,
+      price: product.price ?? (product.variants?.[0]?.price ?? 0),
+      stock: product.stock ?? null,
+      selectedVariantIndex: computedVariantIndex,
+    };
 
-        // Caso: tiene variants
-        if (exists.selections) {
-          const selIndex = normalized.selectedVariantIndex ?? 0;
+    // Si ya existe en carrito
+    if (idx >= 0) {
+      const updated = [...prev];
+      const exists = updated[idx];
 
-          const newSelections = exists.selections.map((s, i) =>
-            i === selIndex
-              ? { ...s, quantity: (s.quantity || 0) + qtyToAdd }
-              : s
+      // Caso: carrito tiene selections (producto con variantes)
+      if (exists.selections) {
+        // Priorizar match por nombre en las selections (si se pasó product.variant)
+        let selIndex = null;
+        if (typeof product.variant === "string") {
+          selIndex = exists.selections.findIndex(
+            (s) => (s.label ?? s.name) === product.variant
           );
-
-          updated[idx] = { ...exists, selections: newSelections };
-          return updated;
         }
+        // Si no encontramos por nombre, usamos el computedVariantIndex (si existe), o fallback 0
+        selIndex = selIndex ?? normalized.selectedVariantIndex ?? 0;
 
-        // Caso: producto normal
-        updated[idx] = {
-          ...exists,
-          quantity: (exists.quantity || 0) + qtyToAdd,
-        };
+        const newSelections = exists.selections.map((s, i) =>
+          i === selIndex ? { ...s, quantity: (s.quantity || 0) + qtyToAdd } : s
+        );
 
+        updated[idx] = { ...exists, selections: newSelections };
         return updated;
       }
 
-      // ===================================
-      // SI ES UN PRODUCTO NUEVO CON VARIANTS
-      // ===================================
-      if (product.variants && product.variants.length > 0) {
-        const selections = product.variants.map((v) => ({
-          label: v.label,
-          price: v.price ?? 0,
-          stock: v.stock ?? null,
-          quantity: 0,
-        }));
+      // Caso: producto simple
+      updated[idx] = {
+        ...exists,
+        quantity: (exists.quantity || 0) + qtyToAdd,
+      };
 
-        const indexToSet = normalized.selectedVariantIndex ?? 0;
-        selections[indexToSet].quantity = qtyToAdd;
+      return updated;
+    }
 
-        const item = {
-          id: normalized.id,
-          name: normalized.name,
-          image: normalized.image,
-          selections,
-        };
+    // Nuevo item con variants -> crear selections (soporta v.name o v.label)
+    if (product.variants && product.variants.length > 0) {
+      const selections = product.variants.map((v) => ({
+        label: v.name ?? v.label ?? "Sin nombre",
+        price: v.price ?? 0,
+        stock: v.stock ?? null,
+        quantity: 0,
+      }));
 
-        return [...prev, item];
-      }
+      const indexToSet = normalized.selectedVariantIndex ?? 0;
+      if (selections[indexToSet]) selections[indexToSet].quantity = qtyToAdd;
 
-      // ===================================
-      // NUEVO ITEM SIMPLE
-      // ===================================
-      return [
-        ...prev,
-        {
-          id: normalized.id,
-          name: normalized.name,
-          image: normalized.image,
-          price: normalized.price,
-          stock: normalized.stock,
-          quantity: qtyToAdd,
-        },
-      ];
-    });
-  };
+      const item = {
+        id: normalized.id,
+        name: normalized.name,
+        image: normalized.image,
+        selections,
+      };
+
+      return [...prev, item];
+    }
+
+    // Nuevo item simple
+    return [
+      ...prev,
+      {
+        id: normalized.id,
+        name: normalized.name,
+        image: normalized.image,
+        price: normalized.price,
+        stock: normalized.stock,
+        quantity: qtyToAdd,
+      },
+    ]; 
+  });
+};
 
   // ====================
   // UPDATE QUANTITY NORMAL

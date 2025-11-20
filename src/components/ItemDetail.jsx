@@ -9,17 +9,17 @@ import Message from "../components/Message/Message";
 
 export default function ItemDetail({ product }) {
   const { addToCart } = useCart();
+
   const [qty, setQty] = useState(0);
   const [added, setAdded] = useState(false);
 
-  const { message, showMessage } = useMessage();
-
-  // --- Variantes ---
-  const hasVariants = Array.isArray(product.variants) && product.variants.length > 0;
-
   const [selectedVariant, setSelectedVariant] = useState(
-    hasVariants ? product.variants[0] : null
+    product.variants && product.variants.length > 0
+      ? product.variants[0]
+      : { name: "Sin Variante", price: product.price }
   );
+
+  const { message, showMessage } = useMessage();
 
   function handleAddToCart(units) {
     setQty(units);
@@ -27,8 +27,8 @@ export default function ItemDetail({ product }) {
     addToCart({
       ...product,
       quantity: units,
-      variant: selectedVariant ? selectedVariant.name : null,
-      price: selectedVariant ? selectedVariant.price : product.price
+      variant: selectedVariant.name,
+      price: selectedVariant.price
     });
 
     setAdded(true);
@@ -41,33 +41,30 @@ export default function ItemDetail({ product }) {
         <h2>{product.name}</h2>
         <p>{product.description}</p>
 
-        {/* Selector de variantes */}
-        {hasVariants && (
+        {/* SELECTOR DE VARIANTES */}
+        {product.variants && product.variants.length > 0 ? (
           <div style={{ marginBottom: 12 }}>
             <label><strong>Variante:</strong></label>
             <select
-              style={{ marginLeft: 10 }}
+              style={{ marginLeft: 8 }}
               value={selectedVariant.name}
-              onChange={(e) =>
-                setSelectedVariant(
-                  product.variants.find(v => v.name === e.target.value)
-                )
-              }
+              onChange={(e) => {
+                const variant = product.variants.find(v => v.name === e.target.value);
+                setSelectedVariant(variant);
+              }}
             >
-              {product.variants.map(v => (
-                <option key={v.name} value={v.name}>
-                  {v.name} - ${v.price}
+              {product.variants.map((v, i) => (
+                <option key={i} value={v.name}>
+                  {v.name} (${v.price})
                 </option>
               ))}
             </select>
           </div>
+        ) : (
+          <p><strong>Variante:</strong> Sin variante</p>
         )}
 
-        {/* Precio dinámico */}
-        <p>
-          <strong>Precio:</strong> $
-          {selectedVariant ? selectedVariant.price : product.price}
-        </p>
+        <p><strong>Precio:</strong> ${selectedVariant.price}</p>
 
         {!added ? (
           <ItemCount stock={10} initial={1} onAdd={handleAddToCart} />
@@ -88,4 +85,3 @@ export default function ItemDetail({ product }) {
     </>
   );
 }
- 
