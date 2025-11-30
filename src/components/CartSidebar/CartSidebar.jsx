@@ -1,7 +1,7 @@
-// CartSidebar.jsx — Sidebar del carrito — Maneja productos, envío y finalización.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./CartSidebar.css";
 import { useCart } from "../../context/CartContext";
+import ConfirmModal from "../Modal/ConfirmModal.jsx";
 
 export default function CartSidebar({
   isOpen,
@@ -25,25 +25,24 @@ export default function CartSidebar({
   const countdownIntervalRef = useRef(null);
   const [waUrl, setWaUrl] = useState(null);
 
-  // Datos del cliente
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [customerDescription, setCustomerDescription] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("transferencia");
+  const [showConfirm, setShowConfirm] = useState(false);
 
-  // Cerrar con ESC
   useEffect(() => {
     const handleEsc = (e) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", handleEsc);
     return () => document.removeEventListener("keydown", handleEsc);
   }, [onClose]);
 
-  // Costo de envío y total
-  const costoEnvio = envioSeleccionado ? shippingConfig.defaultShipping || 0 : 0;
+  const costoEnvio = envioSeleccionado
+    ? shippingConfig.defaultShipping || 0
+    : 0;
   const total = subTotal + costoEnvio;
 
-  // Handlers variantes
   const handleVariantInc = (itemId, idx) => {
     const item = cartItems.find((c) => c.id === itemId);
     if (!item || !item.selections) return;
@@ -59,7 +58,6 @@ export default function CartSidebar({
     if (current > 0) updateVariantQuantity(itemId, idx, current - 1);
   };
 
-  // Validaciones y armado del texto para WhatsApp
   const buildWhatsAppText = (code) => {
     const productsText = cartItems
       .map((item) => {
@@ -68,15 +66,15 @@ export default function CartSidebar({
             .filter((s) => (s.quantity || 0) > 0)
             .map(
               (s) =>
-                `• ${item.name}${s.label ? ` - ${s.label}` : ""}\n  Cantidad: ${s.quantity}\n  Precio: $${(
-                  s.price || 0
-                ).toLocaleString()}`
+                `• ${item.name}${s.label ? ` - ${s.label}` : ""}\n  Cantidad: ${
+                  s.quantity
+                }\n  Precio: $${(s.price || 0).toLocaleString()}`
             )
             .join("\n");
         }
-        return `• ${item.name}\n  Cantidad: ${item.quantity || 0}\n  Precio: $${(
-          item.price || 0
-        ).toLocaleString()}`;
+        return `• ${item.name}\n  Cantidad: ${
+          item.quantity || 0
+        }\n  Precio: $${(item.price || 0).toLocaleString()}`;
       })
       .join("\n");
 
@@ -92,7 +90,6 @@ export default function CartSidebar({
     return text;
   };
 
-  // Inicia el proceso de finalizar: valida y prepara la URL
   const handleFinalize = () => {
     if (totalItems === 0) return alert("No hay unidades en el carrito.");
 
@@ -112,24 +109,19 @@ export default function CartSidebar({
       text
     )}`;
 
-    // Configuramos finalización controlada por efectos
     setWaUrl(url);
     setCountdown(3);
     setIsFinalizing(true);
   };
 
-  // Efecto que maneja el countdown y la acción final cuando llega a 0
   useEffect(() => {
     if (!isFinalizing) {
-      // Si no está finalizando, limpiar intervalos si hubieran quedado
       if (countdownIntervalRef.current) {
         clearInterval(countdownIntervalRef.current);
         countdownIntervalRef.current = null;
       }
       return;
     }
-
-    // Si ya hay un intervalo en marcha, no crear otro
     if (countdownIntervalRef.current) return;
 
     countdownIntervalRef.current = setInterval(() => {
@@ -144,18 +136,13 @@ export default function CartSidebar({
     };
   }, [isFinalizing]);
 
-  // Acción que sucede cuando countdown llega a 0
   useEffect(() => {
     if (!isFinalizing) return;
     if (countdown > 0) return;
-
-    // Cleanup del intervalo
     if (countdownIntervalRef.current) {
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
     }
-
-    // Ejecutar las acciones fuera del render
     if (waUrl) {
       try {
         window.open(waUrl, "_blank");
@@ -164,12 +151,10 @@ export default function CartSidebar({
       }
     }
 
-    // Limpiar carrito y cerrar panel
     clearCart();
     setIsFinalizing(false);
     onClose();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown, isFinalizing, waUrl]); // waUrl incluido para garantizar disponibilidad
+  }, [countdown, isFinalizing, waUrl]);
 
   if (!isOpen) return null;
 
@@ -177,13 +162,16 @@ export default function CartSidebar({
     <div className="cart-sidebar-overlay" onClick={onClose}>
       <aside className="cart-sidebar" onClick={(e) => e.stopPropagation()}>
         <header className="cart-header">
-          <button className="back-btn" onClick={onClose} aria-label="Cerrar carrito">
+          <button
+            className="back-btn"
+            onClick={onClose}
+            aria-label="Cerrar carrito"
+          >
             ←
           </button>
           <h2>Mi carrito ({totalItems})</h2>
         </header>
 
-        {/* ---------- LISTA DE PRODUCTOS ---------- */}
         <div className="cart-items">
           {cartItems.length === 0 ? (
             <p>Tu carrito está vacío 🛒</p>
@@ -192,7 +180,11 @@ export default function CartSidebar({
               if (item.selections) {
                 return (
                   <div key={item.id} className="cart-item">
-                    <img src={item.image} alt={item.name} className="cart-item-img" />
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="cart-item-img"
+                    />
 
                     <div className="cart-item-info">
                       <p>
@@ -201,22 +193,32 @@ export default function CartSidebar({
 
                       <div className="variants-list">
                         {item.selections.map((s, idx) => {
-                          const variantSubtotal = (s.price || 0) * (s.quantity || 0);
+                          const variantSubtotal =
+                            (s.price || 0) * (s.quantity || 0);
 
                           return (
-                            <div key={`${item.id}-v-${idx}`} className="variant-row">
+                            <div
+                              key={`${item.id}-v-${idx}`}
+                              className="variant-row"
+                            >
                               <div className="item-controls-row">
                                 <div className="left-controls">
                                   <div className="quantity-controls">
                                     <button
-                                      onClick={() => handleVariantDec(item.id, idx)}
+                                      onClick={() =>
+                                        handleVariantDec(item.id, idx)
+                                      }
                                       aria-label={`Disminuir variante ${idx}`}
                                     >
                                       −
                                     </button>
-                                    <span className="count-label">{s.quantity || 0}</span>
+                                    <span className="count-label">
+                                      {s.quantity || 0}
+                                    </span>
                                     <button
-                                      onClick={() => handleVariantInc(item.id, idx)}
+                                      onClick={() =>
+                                        handleVariantInc(item.id, idx)
+                                      }
                                       aria-label={`Aumentar variante ${idx}`}
                                     >
                                       +
@@ -224,14 +226,21 @@ export default function CartSidebar({
                                   </div>
                                 </div>
 
-                                <div className="right-price">${(s.price || 0).toLocaleString()}</div>
+                                <div className="right-price">
+                                  ${(s.price || 0).toLocaleString()}
+                                </div>
                               </div>
 
                               <div className="variant-info">
                                 <p className="variant-label">
-                                  Variante: <strong>{s.label ?? s.name ?? "Sin variante"}</strong>
+                                  {" "}
+                                  <strong>
+                                    {s.label ?? s.name ?? "Sin variante"}
+                                  </strong>
                                 </p>
-                                <p className="variant-subtotal">Subtotal: ${variantSubtotal.toLocaleString()}</p>
+                                <p className="variant-subtotal">
+                                  ${variantSubtotal.toLocaleString()}
+                                </p>
                               </div>
                             </div>
                           );
@@ -246,7 +255,11 @@ export default function CartSidebar({
 
               return (
                 <div key={item.id} className="cart-item">
-                  <img src={item.image} alt={item.name} className="cart-item-img" />
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="cart-item-img"
+                  />
 
                   <div className="cart-item-info">
                     <p>
@@ -255,24 +268,34 @@ export default function CartSidebar({
 
                     <div className="item-controls-row">
                       <div className="left-controls">
-                        <button onClick={() => removeFromCart(item.id)} title="Eliminar producto">
+                        <button
+                          onClick={() => removeFromCart(item.id)}
+                          title="Eliminar producto"
+                        >
                           🗑
                         </button>
 
                         <div className="quantity-controls">
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, Math.max(0, (item.quantity || 1) - 1))
+                              updateQuantity(
+                                item.id,
+                                Math.max(0, (item.quantity || 1) - 1)
+                              )
                             }
                             aria-label="Disminuir cantidad"
                           >
                             -
                           </button>
 
-                          <span className="count-label">{item.quantity || 0}</span>
+                          <span className="count-label">
+                            {item.quantity || 0}
+                          </span>
 
                           <button
-                            onClick={() => updateQuantity(item.id, (item.quantity || 0) + 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, (item.quantity || 0) + 1)
+                            }
                             aria-label="Aumentar cantidad"
                           >
                             +
@@ -280,11 +303,14 @@ export default function CartSidebar({
                         </div>
                       </div>
 
-                      <div className="right-price">${price.toLocaleString()}</div>
+                      <div className="right-price">
+                        ${price.toLocaleString()}
+                      </div>
                     </div>
 
                     <p className="item-subtotal">
-                      Subtotal: ${(price * (item.quantity || 0)).toLocaleString()}
+                      Subtotal: $
+                      {(price * (item.quantity || 0)).toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -295,7 +321,7 @@ export default function CartSidebar({
 
         <button
           className="clear-cart"
-          onClick={() => confirm("¿Vaciar carrito?") && clearCart()}
+          onClick={() => setShowConfirm(true)}
           disabled={cartItems.length === 0}
         >
           🗑 Vaciar carrito
@@ -305,11 +331,17 @@ export default function CartSidebar({
           <p>Selecciona una opción</p>
 
           <div className="option-buttons">
-            <button className={!envioSeleccionado ? "selected" : ""} onClick={() => setEnvioSeleccionado(false)}>
+            <button
+              className={!envioSeleccionado ? "selected" : ""}
+              onClick={() => setEnvioSeleccionado(false)}
+            >
               Retiro en persona
             </button>
 
-            <button className={envioSeleccionado ? "selected" : ""} onClick={() => setEnvioSeleccionado(true)}>
+            <button
+              className={envioSeleccionado ? "selected" : ""}
+              onClick={() => setEnvioSeleccionado(true)}
+            >
               Solicito envío
             </button>
           </div>
@@ -371,13 +403,15 @@ export default function CartSidebar({
               Transferencia
             </button>
 
-            <button className={paymentMethod === "efectivo" ? "selected" : ""} onClick={() => setPaymentMethod("efectivo")}>
+            <button
+              className={paymentMethod === "efectivo" ? "selected" : ""}
+              onClick={() => setPaymentMethod("efectivo")}
+            >
               Efectivo
             </button>
           </div>
         </div>
 
-        {/* ---------- OPCIONES EXTRA ---------- */}
         {cartItems.length > 0 && (
           <>
             <div className="cart-footer">
@@ -394,8 +428,14 @@ export default function CartSidebar({
                 </p>
               </div>
 
-              <button className="checkout-btn" onClick={handleFinalize} disabled={isFinalizing}>
-                {isFinalizing ? `Redirigiendo... (${countdown})` : "Finalizar Compra"}
+              <button
+                className="checkout-btn"
+                onClick={handleFinalize}
+                disabled={isFinalizing}
+              >
+                {isFinalizing
+                  ? `Redirigiendo... (${countdown})`
+                  : "Finalizar Compra"}
               </button>
             </div>
           </>
@@ -403,10 +443,23 @@ export default function CartSidebar({
 
         {isFinalizing && (
           <div className="finalizing">
-            <p>Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...</p>
+            <p>
+              Gracias por su compra. Redirigiendo a WhatsApp en {countdown}...
+            </p>
           </div>
         )}
       </aside>
+
+      {showConfirm && (
+        <ConfirmModal
+          text="¿Seguro que desea vaciar el carrito?"
+          onCancel={() => setShowConfirm(false)}
+          onConfirm={() => {
+            clearCart();
+            setShowConfirm(false);
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,3 @@
-// src/pages/Checkout.jsx
 import React, { useState } from "react";
 import { useCart } from "../context/CartContext";
 import { createOrder } from "../data/orders";
@@ -11,7 +10,6 @@ export default function Checkout() {
   async function handleFinishPurchase() {
     setSending(true);
 
-    // Datos completos de la orden
     const order = {
       items: cartItems,
       total: subTotal,
@@ -22,7 +20,6 @@ export default function Checkout() {
     };
 
     try {
-      // createOrder agrega serverTimestamp() adentro
       const id = await createOrder(order);
       setOrderId(id);
 
@@ -34,7 +31,6 @@ export default function Checkout() {
     }
   }
 
-  // Mensaje de éxito
   if (orderId) {
     return (
       <main style={{ padding: 20 }}>
@@ -44,7 +40,6 @@ export default function Checkout() {
     );
   }
 
-  // Vista principal
   return (
     <main style={{ padding: 20 }}>
       <h2>Checkout</h2>

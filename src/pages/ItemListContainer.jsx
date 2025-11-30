@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-// Services
 import { fetchAllProducts, fetchProductsByCategory } from "../data/firebase";
 
-// Mensajes
 import { useMessage } from "../hooks/useMessage";
 import Message from "../components/Message/Message";
 

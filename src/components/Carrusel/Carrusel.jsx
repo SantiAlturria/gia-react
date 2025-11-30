@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import "./Carrusel.css";
 import product1 from "../../assets/product1.jpg";
@@ -87,7 +86,6 @@ export default function ProductSection() {
                 title={`Producto ${index + 1}`}
                 tabIndex={0}
               >
-                {/* Inner container kept only for the border-radius / clipping */}
                 <div className="product-card-inner">
                   <img src={img} alt={`Producto ${index + 1}`} draggable="false" />
                 </div>

@@ -36,6 +36,93 @@
 }
 
 /* =========================================
+   MODAL
+========================================= */
+/* Fondo oscuro */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* Caja del mensaje */
+.confirm-box {
+  background: #fff;
+  padding: 22px 26px;
+  border-radius: 8px;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  font-family: inherit;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  animation: popIn 0.18s ease-out;
+}
+
+/* Texto */
+.confirm-box p {
+  font-size: 17px;
+  margin-bottom: 18px;
+  color: #333;
+}
+
+/* Contenedor de botones */
+.confirm-box .btns {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Botón Confirmar */
+.btn-confirm {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: #c62828; /* rojo sobrio */
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+
+.btn-confirm:hover {
+  background: #b71c1c;
+}
+
+/* Botón Cancelar */
+.btn-cancel {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  background: #e0e0e0;
+  color: #333;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+
+.btn-cancel:hover {
+  background: #cacaca;
+}
+
+/* Animación */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================
    HEADER STICKY
 ========================================= */
 .cart-header {

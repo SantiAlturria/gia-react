@@ -1,4 +1,3 @@
-// src/services/orders.js
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "./firebaseConfig";
 

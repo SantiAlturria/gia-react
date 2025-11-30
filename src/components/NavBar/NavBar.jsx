@@ -21,7 +21,6 @@ export default function NavBar() {
         </NavLink>
 
         <div className="nav-links">
-          {/* Categorías con React Router */}
           <NavLink
             to="/category/salados"
             className={({ isActive }) => (isActive ? "active-link" : "")}
@@ -35,8 +34,6 @@ export default function NavBar() {
           >
             Dulces
           </NavLink>
-
-          {/* Links internos de la landing */}
           <a href="#catalogo">Catálogo</a>
           <a href="#nosotros">Sobre Nosotros</a>
           <a href="#contacto">Contacto</a>
@@ -50,7 +47,7 @@ export default function NavBar() {
       <CartSidebar
         isOpen={isCartOpen}
         onClose={closeCart}
-        cartItems={cartItems} // ✅ los del contexto
+        cartItems={cartItems}
         updateQuantity={updateQuantity}
         clearCart={clearCart}
         shippingConfig={{ zones: [], defaultShipping: 2000 }}

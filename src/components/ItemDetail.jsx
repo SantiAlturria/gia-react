@@ -40,8 +40,7 @@ export default function ItemDetail({ product }) {
       <article className="item-detail" style={{ border: "1px solid #ddd", padding: 16, maxWidth: 700 }}>
         <h2>{product.name}</h2>
         <p>{product.description}</p>
-
-        {/* SELECTOR DE VARIANTES */}
+        
         {product.variants && product.variants.length > 0 ? (
           <div style={{ marginBottom: 12 }}>
             <label><strong>Variante:</strong></label>
