@@ -2,6 +2,7 @@ html, body {
 overflow-x: hidden;
 }
 
+
 .product-section {
 display: flex;
 flex-direction: column;

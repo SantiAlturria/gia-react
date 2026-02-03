@@ -1,13 +1,15 @@
 import "./styles/index.css";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+
 import NavBar from "./components/NavBar/NavBar.jsx";
-import ProductSection from "./components/Carrusel/Carrusel.jsx";
+import HeroSection from "./components/HeroSection/HeroSection.jsx";
+import Carrusel from "./components/Carrusel/Carrusel.jsx";
+import SobreNosotros from "./components/SobreNosotros/SobreNosotros.jsx";
+import Footer from "./components/Footer/Footer.jsx";
+import Catalogo from "./pages/Catalogo";
 import ItemListContainer from "./pages/ItemListContainer.jsx";
 import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
-import HeroSection from "./components/HeroSection/HeroSection.jsx";
-import ProductsList from "./components/ProductsList/ProductsList.jsx";
-import { useCart } from "./context/CartContext.jsx";
 import Checkout from "./pages/Checkout.jsx";
 
 function NotFound() {
@@ -20,11 +22,9 @@ function NotFound() {
 }
 
 export default function App() {
-  const { addToCart, totalItems } = useCart();
-
   return (
     <>
-      <NavBar cartCount={totalItems} />
+      <NavBar />
 
       <Routes>
         <Route
@@ -32,45 +32,19 @@ export default function App() {
           element={
             <>
               <HeroSection />
-              <ProductSection />
-              <ItemListContainer addToCart={addToCart} />
+              <Carrusel />
+              <SobreNosotros />
+              <Footer />
             </>
           }
         />
 
-        <Route
-          path="/category/:categoryId"
-          element={<ItemListContainer addToCart={addToCart} />}
-        />
-
-        <Route
-          path="/item/:id"
-          element={<ItemDetailContainer addToCart={addToCart} />}
-        />
-
-        {/* ESTA ES LA QUE LE FALTABA */}
+        <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/category/:categoryId" element={<ItemListContainer />} />
+        <Route path="/item/:id" element={<ItemDetailContainer />} />
         <Route path="/checkout" element={<Checkout />} />
-
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );
 }
-
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "./data/firebaseConfig";
-
-async function testFirestore() {
-  try {
-    const ref = collection(db, "orders");
-    const doc = await addDoc(ref, {
-      test: true,
-      createdAt: serverTimestamp()
-    });
-    console.log("Orden creada:", doc.id);
-  } catch (err) {
-    console.error("Error Firestore:", err);
-  }
-}
-
-testFirestore();

@@ -4,6 +4,7 @@ import CartWidget from "../CartWidget";
 import CartSidebar from "../CartSidebar/CartSidebar";
 import logo from "../../assets/Logo.svg";
 import "./NavBar.css";
+import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 
 export default function NavBar() {
@@ -21,22 +22,10 @@ export default function NavBar() {
         </NavLink>
 
         <div className="nav-links">
-          <NavLink
-            to="/category/salados"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
-            Salados
-          </NavLink>
-
-          <NavLink
-            to="/category/dulces"
-            className={({ isActive }) => (isActive ? "active-link" : "")}
-          >
-            Dulces
-          </NavLink>
-          <a href="#catalogo">Catálogo</a>
+          <Link to="/catalogo">Catálogo</Link>
           <a href="#nosotros">Sobre Nosotros</a>
           <a href="#contacto">Contacto</a>
+          <a href="#comprarahora">Comprar ahora</a>
         </div>
 
         <div className="cart-container cart" onClick={toggleCart}>
