@@ -1,5 +1,4 @@
 .hero {
-  font-family: "Roboto", sans-serif;
   position: relative;
   display: flex;
   align-items: center;
@@ -55,7 +54,6 @@ line-height: 1;
   border: none;
   padding: 1rem 2.5rem;
   border-radius: 35px;
-  font-family: "Roboto", sans-serif;
   font-size: 1.3rem;
   font-weight: 800;
   cursor: pointer;

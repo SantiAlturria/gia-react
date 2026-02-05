@@ -7,6 +7,7 @@ import HeroSection from "./components/HeroSection/HeroSection.jsx";
 import Carrusel from "./components/Carrusel/Carrusel.jsx";
 import SobreNosotros from "./components/SobreNosotros/SobreNosotros.jsx";
 import Footer from "./components/Footer/Footer.jsx";
+import CatalogoHome from "./pages/CatalogoHome";
 import Catalogo from "./pages/Catalogo";
 import ItemListContainer from "./pages/ItemListContainer.jsx";
 import ItemDetailContainer from "./pages/ItemDetailContainer.jsx";
@@ -34,17 +35,19 @@ export default function App() {
               <HeroSection />
               <Carrusel />
               <SobreNosotros />
-              <Footer />
             </>
           }
         />
 
-        <Route path="/catalogo" element={<Catalogo />} />
+        <Route path="/catalogo" element={<CatalogoHome />} />
+        <Route path="/catalogo/:categoria" element={<Catalogo />} />
         <Route path="/category/:categoryId" element={<ItemListContainer />} />
         <Route path="/item/:id" element={<ItemDetailContainer />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
+
+      <Footer />
     </>
   );
 }

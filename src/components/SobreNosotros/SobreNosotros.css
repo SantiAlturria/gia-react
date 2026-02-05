@@ -15,3 +15,8 @@ color: #555;
 text-shadow: #555 1px 1px 2px;
 line-height: 1;
 }
+
+.sobre-nosotros p {
+margin-top: 1.5rem;
+color: #555;
+}

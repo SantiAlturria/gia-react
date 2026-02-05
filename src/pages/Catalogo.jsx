@@ -1,5 +1,8 @@
-import ItemListContainer from "./ItemListContainer";
+import { useParams } from "react-router-dom";
+import ProductsList from "../components/ProductsList/ProductsList";
 
 export default function Catalogo() {
-  return <ItemListContainer />;
+  const { categoria } = useParams();
+
+  return <ProductsList categoria={categoria} />;
 }

@@ -9,6 +9,13 @@
   --navbar-height: 96px;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 /* Body base */
 body {
   font-family: 'Roboto', sans-serif;

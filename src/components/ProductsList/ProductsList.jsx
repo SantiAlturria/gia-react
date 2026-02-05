@@ -4,38 +4,43 @@ import { db } from "../../data/firebaseConfig";
 import "./ProductsList.css";
 import { useCart } from "../../context/CartContext";
 
-export default function ProductsList({ productos: productosProp }) {
-  const [productos, setProductos] = useState(productosProp || []);
+export default function ProductsList({ categoria }) {
+  const [productos, setProductos] = useState([]);
   const [addedProducts, setAddedProducts] = useState({});
   const { addToCart } = useCart();
 
   useEffect(() => {
-    if (!productosProp) {
-      const fetchData = async () => {
-        try {
-          const querySnapshot = await getDocs(collection(db, "productos"));
-          const data = querySnapshot.docs.map((doc) => ({
+    const fetchData = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "productos"));
+
+        const data = querySnapshot.docs
+          .map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          }));
-          setProductos(data);
-        } catch (error) {
-          console.error("Error al cargar productos:", error);
-        }
-      };
+          }))
+          .filter((prod) => prod.category === categoria);
 
-      fetchData();
-    }
-  }, [productosProp]);
+        setProductos(data);
+      } catch (error) {
+        console.error("Error al cargar productos:", error);
+      }
+    };
 
-  const handleAdd = (prod) => {
-    addToCart(prod);
-    setAddedProducts((prev) => ({ ...prev, [prod.id]: true }));
+    fetchData();
+  }, [categoria]);
 
-    setTimeout(() => {
-      setAddedProducts((prev) => ({ ...prev, [prod.id]: false }));
-    }, 2000);
-  };
+  const handleAdd = (product, variant) => {
+  addToCart({
+    id: `${product.id}-${variant.id}`,
+    productId: product.id,
+    name: product.name,
+    variant: variant.name,
+    price: variant.price,
+    quantity: 1,
+  });
+};
+
 
   return (
     <section className="productos-section">
@@ -49,25 +54,16 @@ export default function ProductsList({ productos: productosProp }) {
             <h3 className="producto-nombre">{prod.name}</h3>
             <p className="producto-categoria">{prod.category}</p>
 
-            {prod.variants?.length ? (
-              <p className="producto-precio">
-                Desde ${prod.variants[0].price}
-              </p>
-            ) : (
-              <p className="producto-precio">${prod.price}</p>
-            )}
+            {prod.variants?.map((variant) => (
+              <button
+                key={variant.id}
+                className="producto-boton"
+                onClick={() => handleAdd(prod, variant)}
+              >
+                {variant.name} · ${variant.price}
+              </button>
+            ))}
 
-            <button
-              className={`producto-boton ${
-                addedProducts[prod.id] ? "producto-agregado" : ""
-              }`}
-              onClick={() => handleAdd(prod)}
-              disabled={addedProducts[prod.id]}
-            >
-              {addedProducts[prod.id]
-                ? "Producto agregado"
-                : "Agregar al carrito"}
-            </button>
           </div>
         ))}
       </div>

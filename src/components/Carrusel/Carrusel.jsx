@@ -30,7 +30,8 @@ export default function ProductSection() {
 
   const prevSlide = () =>
     setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
-  const nextSlide = () => setCurrentIndex((prev) => (prev + 1) % products.length);
+  const nextSlide = () =>
+    setCurrentIndex((prev) => (prev + 1) % products.length);
 
   const normalizedOffset = (i, center) => {
     let offset = i - center;
@@ -43,9 +44,10 @@ export default function ProductSection() {
   return (
     <section className="product-section">
       <p className="mini-description">Mirá esto</p>
-      <h2>Estos son los productos que vas a poder encontrar disponibles a la compra!</h2>
-
-      <button className="cta-button">+ Realizá tu pedido</button>
+      <h2>
+        Estos son los productos que vas a poder encontrar disponibles a la
+        compra!
+      </h2>
 
       <div className="carousel-wrapper-products">
         <button
@@ -54,8 +56,21 @@ export default function ProductSection() {
           aria-label="Anterior"
           title="Anterior"
         >
-          <svg width="14" height="28" viewBox="0 0 14 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2 L2 14 L12 26" stroke="#E879A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <svg
+            width="14"
+            height="28"
+            viewBox="0 0 14 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2 L2 14 L12 26"
+              stroke="#E879A2"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
           </svg>
         </button>
 
@@ -72,7 +87,7 @@ export default function ProductSection() {
             const style = {
               transform: `translate(-50%, -50%) translateX(${translateX}px) translateY(${translateY}px) scale(${scale})`,
               zIndex,
-              transition: "transform .5s ease-in-out, box-shadow .25s ease, opacity .25s ease",
+              transition: "transform .25s ease-out",
               opacity: visible ? 1 : 0,
             };
 
@@ -87,7 +102,11 @@ export default function ProductSection() {
                 tabIndex={0}
               >
                 <div className="product-card-inner">
-                  <img src={img} alt={`Producto ${index + 1}`} draggable="false" />
+                  <img
+                    src={img}
+                    alt={`Producto ${index + 1}`}
+                    draggable="false"
+                  />
                 </div>
               </div>
             );
@@ -100,8 +119,21 @@ export default function ProductSection() {
           aria-label="Siguiente"
           title="Siguiente"
         >
-          <svg width="14" height="28" viewBox="0 0 14 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 2 L12 14 L2 26" stroke="#E879A2" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <svg
+            width="14"
+            height="28"
+            viewBox="0 0 14 28"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M2 2 L12 14 L2 26"
+              stroke="#E879A2"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
           </svg>
         </button>
       </div>
